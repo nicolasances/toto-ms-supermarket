@@ -2,8 +2,8 @@ name: Production Release
 
 on:
   push:
-    # branches: 
-    #   - 'release/**'
+    branches: 
+      - 'release/**'
 
 jobs:
   # This workflow contains a single job called "release"

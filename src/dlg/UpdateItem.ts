@@ -8,11 +8,13 @@ import { ListItem } from "../model/ListItem";
 import { ValidationError } from "toto-api-controller/dist/validation/Validator";
 import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError'
 
-export class AddItemToList implements TotoDelegate {
+export class UpdateItem implements TotoDelegate {
 
     async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
 
         const config = execContext.config as ControllerConfig
+
+        const itemId = req.params.id;
 
         let client;
 
@@ -29,10 +31,9 @@ export class AddItemToList implements TotoDelegate {
             const item = ListItem.fromTransferObject(req.body);
 
             // Save the item
-            const itemId = await store.addItemToList(item);
+            await store.updateItem(itemId, item);
 
-            // Return the created Id
-            return { id: itemId }
+            return { updated: true }
 
         } catch (error) {
 

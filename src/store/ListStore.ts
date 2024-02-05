@@ -1,4 +1,4 @@
-import { Db } from "mongodb";
+import { Db, ObjectId } from "mongodb";
 import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { ControllerConfig } from "../Config";
 import { ListItem } from "../model/ListItem";
@@ -26,6 +26,41 @@ export class ListStore {
         const result = await this.db.collection(this.config.getCollections().items).insertOne(item);
 
         return result.insertedId.toHexString();
+
+    }
+
+    /**
+     * Updates a list item
+     * 
+     * @param itemId the id of the item to update
+     * @param item the item to update
+     */
+    async updateItem(itemId: string, item: ListItem) {
+
+        // Update the item
+        await this.db.collection(this.config.getCollections().items).updateOne({ _id: new ObjectId(itemId) }, { $set: item })
+
+    }
+
+    /**
+     * Retrieves all the available items
+     */
+    async getItems(): Promise<ListItem[]> {
+
+        const items = this.db.collection(this.config.getCollections().items).find();
+
+        let convertedItems = []
+
+        while (await items.hasNext()) {
+
+            const bson = await items.next();
+
+            const item = bson ? ListItem.fromMongoBSON(bson) : null
+
+            if (item) convertedItems.push(item)
+        }
+
+        return convertedItems;
 
     }
 }
