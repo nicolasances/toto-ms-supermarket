@@ -1,7 +1,7 @@
 {
-  "name": "toto-node-template",
-  "version": "1.0.0",
-  "description": "Template for Toto NodeJS Microservices",
+  "name": "toto-ms-supermarket",
+  "version": "0.1.0",
+  "description": "Toto Supermarket API",
   "main": "index.js",
   "scripts": {
     "start:dev": "npx nodemon",
