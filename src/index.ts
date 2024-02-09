@@ -8,7 +8,7 @@ const api = new TotoAPIController("toto-ms-supermarket", new ControllerConfig())
 
 api.path('GET', '/list/items', new GetItems())
 api.path('POST', '/list/items', new AddItemToList())
-api.path('PUT', 'list/items/:id', new UpdateItem())
+api.path('PUT', '/list/items/:id', new UpdateItem())
 
 api.init().then(() => {
     api.listen()
