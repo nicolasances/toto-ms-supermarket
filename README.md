@@ -11,4 +11,4 @@ This API also supports Toto Games aimed at gathering information for the trainin
 The following diagram represents the current architecture of `toto-ms-supermarket`. 
 <br><br><br>
 
-![](./docs/diagrams/architecture.png)
+![New arch](./docs/diagrams/architecture.png)
