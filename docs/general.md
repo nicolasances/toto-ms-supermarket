@@ -11,3 +11,7 @@ A *Location List (LL)* is a **sorted list** for a given Location.
 
 ### 1.3. Location (L)
 A *Location (L)* is a Supermarket in a given place. 
+
+## 2. Specific flows
+
+ 1. [Adding an Item](adding-item.md)
