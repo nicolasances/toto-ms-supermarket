@@ -6,7 +6,7 @@ Adding an item to the supermarket list triggers two processes:
 
 The following diagram depicts the flow: <br><br>
 
-![](add-item.png)
+![](diagrams/add-item.png)
 
 The steps are the following: 
 
