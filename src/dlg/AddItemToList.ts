@@ -7,6 +7,7 @@ import { ListStore } from "../store/ListStore";
 import { ListItem } from "../model/ListItem";
 import { ValidationError } from "toto-api-controller/dist/validation/Validator";
 import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError'
+import { EventPublisher } from "../evt/EventPublisher";
 
 export class AddItemToList implements TotoDelegate {
 
@@ -30,6 +31,9 @@ export class AddItemToList implements TotoDelegate {
 
             // Save the item
             const itemId = await store.addItemToList(item);
+
+            // Publish the event on PubSub
+            await new EventPublisher(execContext, "supermarket").publishEvent(itemId, "item-added", `Item [${item.id}] added to the Supermarket List`, item)
 
             // Return the created Id
             return { id: itemId }
