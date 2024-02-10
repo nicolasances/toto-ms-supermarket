@@ -6,3 +6,9 @@ This API also supports Toto Games aimed at gathering information for the trainin
 ## Index
 
 1. [General Architecture and Processes](./docs/general.md)
+
+## Architectural Diagram
+The following diagram represents the current architecture of `toto-ms-supermarket`. 
+<br><br><br>
+
+![](./docs/diagrams/architecture.png)
