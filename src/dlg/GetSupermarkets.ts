@@ -8,7 +8,7 @@ export class GetSupermarkets implements TotoDelegate {
 
     async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
 
-        return { supermarkets: new SupermarketStore().getSupermarkets() }
+        return new SupermarketStore().getSupermarkets()
 
     }
 
