@@ -3,6 +3,7 @@ import { AEventHandler, EventHandlingResult } from "../EventHanlder";
 import { TotoEvent } from "../TotoEvent";
 import { HandledEvents } from "../EventHandlerHook";
 import { basicallyHandleError } from "../../util/ErrorUtil";
+import { AddItemAndSortProcess } from "../../process/AddItemAndSortProcess";
 
 export class OnItemAdded extends AEventHandler {
 
@@ -19,23 +20,11 @@ export class OnItemAdded extends AEventHandler {
         const itemId = msg.id;
         const item = msg.data;
 
-        let client;
-
         logger.compute(cid, `Event [${msg.type}] received. Item [${itemId}] has been added. Item: [${JSON.stringify(item)}]`)
 
-        try {
+        await new AddItemAndSortProcess(this.execContext).do(item);
 
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
-
-            logger.compute(cid, `Event [${msg.type}] successfully handled.`)
-
-        } catch (error) {
-            basicallyHandleError(error, logger, cid);
-        }
-        finally {
-            if (client) client.close();
-        }
+        logger.compute(cid, `Event [${msg.type}] successfully handled.`)
 
         return {}
     }
