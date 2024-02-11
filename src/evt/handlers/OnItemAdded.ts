@@ -9,7 +9,6 @@ export class OnItemAdded extends AEventHandler {
 
     async handleEvent(msg: TotoEvent): Promise<EventHandlingResult> {
 
-        const config = this.execContext.config as ControllerConfig;
         const logger = this.execContext.logger;
         const cid = this.execContext.cid;
 

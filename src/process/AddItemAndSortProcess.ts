@@ -64,7 +64,7 @@ export class AddItemAndSortProcess {
 
                     logger.compute(cid, `Item is the first of the Location List for supermarket [${supermarket.name}]`)
 
-                    locationListStore.addLocationListItem(LocationListItem.fromListItem(item, supermarket));
+                    await locationListStore.addLocationListItem(LocationListItem.fromListItem(item, supermarket));
 
                 }
                 // 2.3. If the list is NOT empty, then you need to Sort, Add & Save
@@ -77,7 +77,7 @@ export class AddItemAndSortProcess {
                     logger.compute(cid, `Item is position at predicted index [${predictedIndex}]`)
 
                     // Add & Save
-                    locationListStore.addLocationListItem(LocationListItem.fromListItem(item, supermarket, predictedIndex))
+                    await locationListStore.addLocationListItem(LocationListItem.fromListItem(item, supermarket, predictedIndex))
 
                 }
 
