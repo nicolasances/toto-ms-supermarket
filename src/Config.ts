@@ -10,6 +10,7 @@ const secretManagerClient = new SecretManagerServiceClient();
 const dbName = 'supermarket';
 const collections = {
     items: 'items',
+    locationLists: 'locationLists', 
 };
 
 export class ControllerConfig implements TotoControllerConfig {
