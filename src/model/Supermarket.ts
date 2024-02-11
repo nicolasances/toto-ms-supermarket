@@ -6,9 +6,10 @@ export class Supermarket {
     name: string
     location: string 
 
-    constructor(name: string, location: string) {
+    constructor(name: string, location: string, id?: string) {
         this.name = name;
         this.location = location; 
+        this.id = id;
     }
 
     static fromPersistentBson(bson: WithId<Document>) {
