@@ -1,9 +1,10 @@
 import { Document, WithId } from "mongodb"
 import { Supermarket } from "./Supermarket"
 import { ListItem } from "./ListItem"
-import { F_INDEX, F_NAME, F_SUP_LOCATION, F_SUP_NAME } from "../store/LocationListStore"
+import { F_INDEX, F_NAME, F_SUP_LOCATION, F_SUP_NAME, F_TICKED, F_USER_INDEX } from "../store/LocationListStore"
 import { ValidationError } from "toto-api-controller/dist/validation/Validator"
 
+export const DEFAULT_USER_INDEX = -1
 
 export class LocationListItem {
 
@@ -12,6 +13,7 @@ export class LocationListItem {
     supermarketName: string
     supermarketLocation: string
     index: number
+    userIndex: number               // This is the index that the user assigned to the item, by clicking on it
     ticked: boolean
 
     constructor(name: string, index: number, supermarket: Supermarket) {
@@ -20,15 +22,17 @@ export class LocationListItem {
         this.index = index;
         this.supermarketName = supermarket.name;
         this.supermarketLocation = supermarket.location;
-        this.ticked = false
+        this.ticked = false;
+        this.userIndex = DEFAULT_USER_INDEX;
 
     }
 
     static fromPersistentBson(bson: WithId<Document>) {
 
         const item = new LocationListItem(bson[F_NAME], bson[F_INDEX], new Supermarket(bson[F_SUP_NAME], bson[F_SUP_LOCATION]));
-        item.id = bson._id.toHexString()
-        item.ticked = bson.ticked
+        item.id = bson._id.toHexString();
+        item.ticked = bson[F_TICKED];
+        item.userIndex = bson[F_USER_INDEX];
 
         return item;
     }

@@ -6,8 +6,10 @@ import { LocationListItem } from "../model/LocationListItem";
 
 export const F_NAME = 'name';
 export const F_INDEX = 'index';
+export const F_USER_INDEX = 'userIndex';
 export const F_SUP_NAME = 'supermarketName';
 export const F_SUP_LOCATION = 'supermarketLocation';
+export const F_TICKED = 'ticked';
 
 export class LocationListStore {
 
@@ -74,6 +76,21 @@ export class LocationListStore {
         const result = await this.db.collection(this.config.getCollections().locationLists).updateOne({ _id: new ObjectId(itemId) }, { $set: item })
 
         return result
+
+    }
+
+    /**
+     * Ticks or unticks an item
+     * 
+     * @param itemId the id of the item to update
+     * @param newUserIndex the newly assigned user index
+     * @param ticked the updated ticked value
+     */
+    async updateTick(itemId: string, newUserIndex: number, ticked: boolean) {
+
+        const result = await this.db.collection(this.config.getCollections().locationLists).updateOne({ _id: new ObjectId(itemId) }, { $set: { [F_TICKED]: ticked, [F_USER_INDEX]: newUserIndex } })
+
+        return result;
 
     }
 
