@@ -8,7 +8,7 @@ import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeErro
 import { LocationListStore } from "../store/LocationListStore";
 import { LocationListItem } from "../model/LocationListItem";
 
-export class UpdateItem implements TotoDelegate {
+export class UpdateLocationListItem implements TotoDelegate {
 
     async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
 
