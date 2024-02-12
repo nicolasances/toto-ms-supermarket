@@ -15,6 +15,7 @@ api.path('PUT', '/list/items/:id', new UpdateItem())
 
 api.path('GET', '/supermarkets', new GetSupermarkets())
 api.path('GET', '/supermarkets/:id/items', new GetLocationList())
+api.path('GET', '/supermarkets/:sid/items/:id', new GetLocationList())
 
 api.path('POST', '/events', new EventHandlerHook())
 

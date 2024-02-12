@@ -30,7 +30,7 @@ export class LocationListStore {
 
         const locationListItems = []
 
-        const cursor = this.db.collection(this.config.getCollections().locationLists).find({ [F_SUP_NAME]: supermarket.name, [F_SUP_LOCATION]: supermarket.location }).sort({[F_INDEX]: 1})
+        const cursor = this.db.collection(this.config.getCollections().locationLists).find({ [F_SUP_NAME]: supermarket.name, [F_SUP_LOCATION]: supermarket.location }).sort({ [F_INDEX]: 1 })
 
         while (await cursor.hasNext()) {
 
@@ -60,6 +60,20 @@ export class LocationListStore {
         const result = await this.db.collection(this.config.getCollections().locationLists).insertOne(item);
 
         return result.insertedId.toHexString();
+
+    }
+
+    /**
+     * Updates the provided item
+     * 
+     * @param itemId the item id
+     * @param item the updated item
+     */
+    async updateItem(itemId: string, item: LocationListItem) {
+
+        const result = await this.db.collection(this.config.getCollections().locationLists).updateOne({ _id: new ObjectId(itemId) }, { $set: item })
+
+        return result
 
     }
 
