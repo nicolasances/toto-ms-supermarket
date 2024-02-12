@@ -61,7 +61,7 @@ export class TickLocationItem implements TotoDelegate {
 
                     // Find the highest userIndex
                     for (const item of items) {
-                        if (item.userIndex > maxItem.userIndex) maxItem = item;
+                        if (item.id != maxItem.id && item.userIndex > maxItem.userIndex) maxItem = item;
                     }
     
                     assignedUserIndex = maxItem.userIndex + 1
