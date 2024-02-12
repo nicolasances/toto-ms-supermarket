@@ -9,6 +9,8 @@ import { LocationListStore } from "../store/LocationListStore";
 import { DEFAULT_USER_INDEX, LocationListItem } from "../model/LocationListItem";
 import { Supermarket } from "../model/Supermarket";
 import { SupermarketStore } from "../store/SupermarketStore";
+import { countTickedItems, determineUserIndex } from "../util/LocationListUtils";
+import { EventPublisher } from "../evt/EventPublisher";
 
 /**
  * Ticking (or unticking) a location item does mainly two things: 
@@ -50,31 +52,18 @@ export class TickLocationItem implements TotoDelegate {
             // Retrieve all the items in the list
             const items = await store.getLocationListItems(supermarket);
 
-            // If the item was ticked now, assign it the highest index in the list + 1
-            let assignedUserIndex = DEFAULT_USER_INDEX;
-
-            if (items.length > 0) {
-
-                if (ticked === true) {
-    
-                    let maxItem = items[0]; 
-
-                    // Find the highest userIndex
-                    for (const item of items) {
-                        if (item.id != maxItem.id && item.userIndex > maxItem.userIndex) maxItem = item;
-                    }
-    
-                    assignedUserIndex = maxItem.userIndex + 1
-    
-                }
-                // If the item was unticked, assign it the DEFAULT_USER_INDEX index
-                else {
-                    assignedUserIndex = DEFAULT_USER_INDEX;
-                }
-            }
+            // Determine the user index of the item based on its "ticked" status
+            const assignedUserIndex = determineUserIndex(items, ticked);
 
             // Update the items' ticked and userIndex attributes
             const updateResult = await store.updateTick(itemId, assignedUserIndex, ticked);
+
+            // Count how many items have been ticked
+            // If all the items of the list have NOW been ticked, publish an event
+            if (ticked === true && countTickedItems(items) == items.length - 1) {
+
+                await new EventPublisher(execContext, 'supermarket').publishEvent(supermarketId, `location-list-closed`, `A Location List has been closed.`)
+            }
 
             return { ...updateResult, ticked: ticked, assignedUserIndex: assignedUserIndex };
 

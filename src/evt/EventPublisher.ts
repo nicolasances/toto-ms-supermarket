@@ -91,7 +91,7 @@ export interface PublishingResult {
 
 export type TopicName = "supermarket"
 
-export type EventType = 'item-added' | 'item-deleted';
+export type EventType = 'item-added' | 'item-deleted' | 'location-list-closed';
 
 class TopicWrapper {
 
