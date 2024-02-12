@@ -30,7 +30,7 @@ export class LocationListStore {
 
         const locationListItems = []
 
-        const cursor = this.db.collection(this.config.getCollections().locationLists).find({ [F_SUP_NAME]: supermarket.name, [F_SUP_LOCATION]: supermarket.location })
+        const cursor = this.db.collection(this.config.getCollections().locationLists).find({ [F_SUP_NAME]: supermarket.name, [F_SUP_LOCATION]: supermarket.location }).sort({[F_INDEX]: 1})
 
         while (await cursor.hasNext()) {
 
