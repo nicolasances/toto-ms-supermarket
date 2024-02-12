@@ -53,18 +53,24 @@ export class TickLocationItem implements TotoDelegate {
             // If the item was ticked now, assign it the highest index in the list + 1
             let assignedUserIndex = DEFAULT_USER_INDEX;
 
-            if (ticked === true) {
+            if (items.length > 0) {
 
-                const maxItem = items.reduce((prevValue, item) => {
-                    return item.userIndex > prevValue.userIndex ? item : prevValue
-                })
+                if (ticked === true) {
+    
+                    let maxItem = items[0]; 
 
-                assignedUserIndex = maxItem.index + 1
-
-            }
-            // If the item was unticked, assign it the DEFAULT_USER_INDEX index
-            else {
-                assignedUserIndex = DEFAULT_USER_INDEX;
+                    // Find the highest userIndex
+                    for (const item of items) {
+                        if (item.userIndex > maxItem.userIndex) maxItem = item;
+                    }
+    
+                    assignedUserIndex = maxItem.userIndex + 1
+    
+                }
+                // If the item was unticked, assign it the DEFAULT_USER_INDEX index
+                else {
+                    assignedUserIndex = DEFAULT_USER_INDEX;
+                }
             }
 
             // Update the items' ticked and userIndex attributes
