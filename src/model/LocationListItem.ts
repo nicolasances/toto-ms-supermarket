@@ -28,6 +28,7 @@ export class LocationListItem {
 
         const item = new LocationListItem(bson[F_NAME], bson[F_INDEX], new Supermarket(bson[F_SUP_NAME], bson[F_SUP_LOCATION]));
         item.id = bson._id.toHexString()
+        item.ticked = bson.ticked
 
         return item;
     }
