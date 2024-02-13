@@ -11,6 +11,7 @@ const dbName = 'supermarket';
 const collections = {
     items: 'items',
     locationLists: 'locationLists', 
+    archivedLists: 'archivedLists', 
 };
 
 export class ControllerConfig implements TotoControllerConfig {

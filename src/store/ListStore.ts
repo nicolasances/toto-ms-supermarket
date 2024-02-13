@@ -63,4 +63,13 @@ export class ListStore {
         return convertedItems;
 
     }
+
+    /**
+     * Deletes all items in the main list
+     */
+    async deleteAllItems() {
+
+        await this.db.collection(this.config.getCollections().items).deleteMany({});
+
+    }
 }

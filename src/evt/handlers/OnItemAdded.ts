@@ -25,6 +25,6 @@ export class OnItemAdded extends AEventHandler {
 
         logger.compute(cid, `Event [${msg.type}] successfully handled.`)
 
-        return {}
+        return { eventProcessed: true }
     }
 }

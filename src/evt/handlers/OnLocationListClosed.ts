@@ -1,6 +1,9 @@
 import { AEventHandler, EventHandlingResult } from "../EventHanlder";
 import { TotoEvent } from "../TotoEvent";
 import { HandledEvents } from "../EventHandlerHook";
+import { ArchiveLocationList } from "../../process/ArchiveLocationList";
+import { DeleteAllLocationLists } from "../../process/DeleteAllLocationLists";
+import { DeleteMainSupermarketList } from "../../process/DeleteMainSupermarketList";
 
 export class OnLocationListClosed extends AEventHandler {
 
@@ -14,12 +17,20 @@ export class OnLocationListClosed extends AEventHandler {
 
         // Extract data
         const supermarketId = msg.id;
-        const item = msg.data;
 
         logger.compute(cid, `Event [${msg.type}] received. Supermarket [${supermarketId}] Location List has been closed.`)
 
+        // 1. Copy the closed location list to an archive
+        await new ArchiveLocationList(this.execContext).do(supermarketId);
+
+        // 2. Delete all the Locations Lists
+        await new DeleteAllLocationLists(this.execContext).do();
+
+        // 3. Delete all items in the Main Supermarket List
+        await new DeleteMainSupermarketList(this.execContext).do();
+
         logger.compute(cid, `Event [${msg.type}] successfully handled.`)
 
-        return {}
+        return { eventProcessed: true }
     }
 }

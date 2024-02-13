@@ -94,4 +94,13 @@ export class LocationListStore {
 
     }
 
+    /**
+     * Deletes all Location Lists
+     */
+    async deleteAllLocationLists() {
+
+        await this.db.collection(this.config.getCollections().locationLists).deleteMany({});
+        
+    }    
+
 }
