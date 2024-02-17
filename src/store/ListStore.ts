@@ -30,6 +30,17 @@ export class ListStore {
     }
 
     /**
+     * Delets the item from the main supermarket list
+     * 
+     * @param itemId the id of the item to delete
+     */
+    async deleteItem(itemId: string) {
+
+        await this.db.collection(this.config.getCollections().items).deleteOne({ _id: new ObjectId(itemId) })
+
+    }
+
+    /**
      * Updates a list item
      * 
      * @param itemId the id of the item to update
