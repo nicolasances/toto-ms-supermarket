@@ -36,7 +36,7 @@ export class GetNames implements TotoDelegate {
             const store = new ArchivedListStore(db, execContext);
 
             // Get the names
-            const names = store.getDistinctItemNames(300);
+            const names = await store.getDistinctItemNames(300);
 
             return { names: names }
 
