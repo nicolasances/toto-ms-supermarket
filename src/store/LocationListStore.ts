@@ -4,6 +4,7 @@ import { ControllerConfig } from "../Config";
 import { Supermarket } from "../model/Supermarket";
 import { LocationListItem } from "../model/LocationListItem";
 
+export const F_ITEM_ID = 'itemId';  // Id of the item in the main supermarket list
 export const F_NAME = 'name';
 export const F_INDEX = 'index';
 export const F_USER_INDEX = 'userIndex';
@@ -49,6 +50,17 @@ export class LocationListStore {
         }
 
         return locationListItems;
+
+    }
+
+    /**
+     * Deletes the item from ALL location lists
+     * 
+     * @param itemId the id of the item to delete
+     */
+    async deleteItemFromAllLists(itemId: string) {
+
+        await this.db.collection(this.config.getCollections().locationLists).deleteMany({ [F_ITEM_ID]: itemId })
 
     }
 
@@ -100,7 +112,7 @@ export class LocationListStore {
     async deleteAllLocationLists() {
 
         await this.db.collection(this.config.getCollections().locationLists).deleteMany({});
-        
-    }    
+
+    }
 
 }

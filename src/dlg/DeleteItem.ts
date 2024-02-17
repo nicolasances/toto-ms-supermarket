@@ -4,9 +4,9 @@ import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
 import { UserContext } from "toto-api-controller/dist/model/UserContext";
 import { ControllerConfig } from "../Config";
 import { ListStore } from "../store/ListStore";
-import { ListItem } from "../model/ListItem";
 import { ValidationError } from "toto-api-controller/dist/validation/Validator";
 import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError'
+import { EventPublisher } from "../evt/EventPublisher";
 
 export class DeleteItem implements TotoDelegate {
 
@@ -29,6 +29,9 @@ export class DeleteItem implements TotoDelegate {
 
             // Delete the item
             await store.deleteItem(itemId);
+
+            // Publish the event on PubSub
+            await new EventPublisher(execContext, "supermarket").publishEvent(itemId, "item-deleted", `Item [${itemId}] delete from the main Supermarket List`)
             
             return { deleted: true }
 

@@ -6,6 +6,7 @@ import { UserContext } from "toto-api-controller/dist/model/UserContext";
 import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { OnItemAdded } from "./handlers/OnItemAdded";
 import { OnLocationListClosed } from "./handlers/OnLocationListClosed";
+import { OnItemDeleted } from "./handlers/OnItemDeleted";
 
 export class EventHandlerHook implements TotoDelegate {
 
@@ -19,7 +20,8 @@ export class EventHandlerHook implements TotoDelegate {
         const HANDLERS: IIndexable = {
 
             [HandledEvents.itemAdded]: [new OnItemAdded(execContext)],
-            [HandledEvents.locationListClosed]: [new OnLocationListClosed(execContext)]
+            [HandledEvents.itemDeleted]: [new OnItemDeleted(execContext)],
+            [HandledEvents.locationListClosed]: [new OnLocationListClosed(execContext)],
 
         }
 
@@ -44,6 +46,7 @@ export class EventHandlerHook implements TotoDelegate {
 
 export const HandledEvents = {
     itemAdded: "item-added",
+    itemDeleted: "item-deleted",
     locationListClosed: 'location-list-closed',
 }
 
