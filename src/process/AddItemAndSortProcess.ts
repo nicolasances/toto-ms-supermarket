@@ -37,7 +37,7 @@ export class AddItemAndSortProcess {
 
         let client;
 
-        logger.compute(cid, `Adding list item [${item}] to Location Lists and re-sorting.`)
+        logger.compute(cid, `Adding list item [${JSON.stringify(item)}] to Location Lists and re-sorting.`)
 
         try {
 

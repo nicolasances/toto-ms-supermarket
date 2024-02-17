@@ -19,6 +19,9 @@ export class OnItemAdded extends AEventHandler {
         const itemId = msg.id;
         const item = msg.data;
 
+        // Add the id to the item
+        item.id = itemId
+
         logger.compute(cid, `Event [${msg.type}] received. Item [${itemId}] has been added. Item: [${JSON.stringify(item)}]`)
 
         await new AddItemAndSortProcess(this.execContext).do(item);
