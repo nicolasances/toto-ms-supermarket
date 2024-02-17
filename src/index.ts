@@ -8,6 +8,7 @@ import { EventHandlerHook } from "./evt/EventHandlerHook";
 import { GetLocationList } from "./dlg/GetLocationList";
 import { TickLocationItem } from "./dlg/TickLocationItem";
 import { DeleteItem } from "./dlg/DeleteItem";
+import { GetNames } from "./dlg/GetNames";
 
 const api = new TotoAPIController("toto-ms-supermarket", new ControllerConfig())
 
@@ -19,6 +20,8 @@ api.path('DELETE', '/list/items/:id', new DeleteItem())
 api.path('GET', '/supermarkets', new GetSupermarkets())
 api.path('GET', '/supermarkets/:id/items', new GetLocationList())
 api.path('PUT', '/supermarkets/:sid/items/:id/tick', new TickLocationItem())
+
+api.path('GET', '/names', new GetNames())
 
 api.path('POST', '/events', new EventHandlerHook())
 
