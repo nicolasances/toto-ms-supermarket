@@ -1,10 +1,11 @@
 import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoRuntimeError } from "toto-api-controller/dist/model/TotoRuntimeError";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
 import { ControllerConfig } from "../Config";
-import { LocationListStore } from "../store/LocationListStore";
+import { ValidationError } from "toto-api-controller/dist/validation/Validator";
+import { TotoRuntimeError } from "toto-api-controller/dist/model/TotoRuntimeError";
+import { Db } from "mongodb";
 
-export class DeleteAllLocationLists {
+
+export class MongoTransaction<T> {
 
     execContext: ExecutionContext;
 
@@ -12,12 +13,9 @@ export class DeleteAllLocationLists {
         this.execContext = execContext;
     }
 
-    async do() {
-
+    async execute(process: Process<T>): Promise<T> {
 
         const config = this.execContext.config as ControllerConfig
-        const logger = this.execContext.logger;
-        const cid = this.execContext.cid;
 
         let client;
 
@@ -27,16 +25,8 @@ export class DeleteAllLocationLists {
             client = await config.getMongoClient();
             const db = client.db(config.getDBName());
 
-            // Instantiate stores
-            const locationListStore = new LocationListStore(db, this.execContext);
-
-            logger.compute(cid, `Deleting all Location Lists.`)
-
-            // Delete all Location Lists
-            await locationListStore.deleteAllLocationLists()
-
-            // Done
-            logger.compute(cid, `All Location Lists deleted.`)
+            // Execute the process
+            return await process.do(db);
 
         } catch (error) {
 
@@ -52,5 +42,13 @@ export class DeleteAllLocationLists {
         finally {
             if (client) client.close();
         }
+
     }
+
+}
+
+export abstract class Process<T> {
+
+    abstract do(db: Db): Promise<T>
+
 }

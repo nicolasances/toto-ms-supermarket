@@ -3,6 +3,7 @@ import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContex
 import { ControllerConfig } from "../Config";
 import { Supermarket } from "../model/Supermarket";
 import { LocationListItem } from "../model/LocationListItem";
+import { ArchivedListItem } from "../model/ArchivedListItem";
 
 export const F_ITEM_ID = 'itemId';  // Id of the item in the main supermarket list
 export const F_NAME = 'name';
@@ -47,6 +48,17 @@ export class ArchivedListStore {
         const names = result.map(entry => entry._id)
 
         return names;
+    }
+
+    /**
+     * Inserts all of the provided items into the archive
+     * 
+     * @param itemsToArchive items to archive
+     */
+    async insertItems(itemsToArchive: ArchivedListItem[]) {
+
+        await this.db.collection(this.config.getCollections().archivedLists).insertMany(itemsToArchive)
+
     }
 
 }

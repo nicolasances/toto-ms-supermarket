@@ -83,4 +83,5 @@ export class ListStore {
         await this.db.collection(this.config.getCollections().items).deleteMany({});
 
     }
+
 }

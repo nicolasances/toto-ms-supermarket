@@ -115,4 +115,42 @@ export class LocationListStore {
 
     }
 
+    /**
+     * Retrieve unticked items from that location
+     * 
+     * @param supermarket the location
+     */
+    async getUntickedItems(supermarket: Supermarket): Promise<LocationListItem[]> {
+
+        const locationListItems = []
+
+        const cursor = this.db.collection(this.config.getCollections().locationLists).find({ [F_SUP_LOCATION]: supermarket.location, [F_SUP_NAME]: supermarket.name, [F_TICKED]: false })
+
+        while (await cursor.hasNext()) {
+
+            const llitem = await cursor.next()
+
+            if (!llitem) continue;
+
+            // Conver into LocationListItem
+            const item = LocationListItem.fromPersistentBson(llitem);
+
+            // Add to result list
+            locationListItems.push(item)
+
+        }
+
+        return locationListItems;
+
+    }
+
+    /**
+     * Deletes all items that are not ticked 
+     */
+    async deleteUntickedItems() {
+
+        await this.db.collection(this.config.getCollections().locationLists).deleteMany({ [F_TICKED]: false })
+
+    }
+
 }
