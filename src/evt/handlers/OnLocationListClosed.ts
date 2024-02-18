@@ -24,7 +24,7 @@ export class OnLocationListClosed extends AEventHandler {
         const supermarketId = msg.id;
         let untickedItems = msg.data && msg.data.untickedItems ? msg.data.untickedItems : null;
 
-        logger.compute(cid, `Event [${msg.type}] received. Supermarket [${supermarketId}] Location List has been closed.`)
+        logger.compute(cid, `Event [${msg.type}] received. Supermarket [${supermarketId}] Location List has been closed. Unticked items: [${JSON.stringify(untickedItems ?? {})}]`)
 
         // Instantiate the process
         const process = new OnLocationListClosedProcess(this.execContext, supermarketId, untickedItems)

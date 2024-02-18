@@ -49,7 +49,7 @@ export class ArchiveLocationListProcess extends Process<{ done: boolean }> {
         }
 
         // Save the list
-        await new ArchivedListStore(db, this.execContext).insertItems(itemsToArchive);
+        if (itemsToArchive.length > 0) await new ArchivedListStore(db, this.execContext).insertItems(itemsToArchive);
 
         // Done
         logger.compute(cid, `Archived [${itemsToArchive.length}] items with listId [${listId}]`)
