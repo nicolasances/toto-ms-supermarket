@@ -42,9 +42,11 @@ export class CloseShoppingList implements TotoDelegate {
 
         const supermarketId = req.params.sid;
 
-        new MongoTransaction<LocationListItem[]>(execContext).execute(
+        const result = new MongoTransaction<LocationListItem[]>(execContext).execute(
             new CloseShoppingListProcess(execContext, supermarketId)
         );
+
+        return { untickedItems: result }
 
     }
 
