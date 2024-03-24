@@ -3,6 +3,7 @@ import { Supermarket } from "./Supermarket"
 import { ListItem } from "./ListItem"
 import { ValidationError } from "toto-api-controller/dist/validation/Validator"
 import { LocationListItem } from "./LocationListItem"
+import { F_LIST_ID, F_NAME, F_SUP_ID, F_SUP_LOCATION, F_SUP_NAME, F_USER_INDEX } from "../store/ArchivedListStore"
 
 export const DEFAULT_USER_INDEX = -1
 
@@ -25,6 +26,17 @@ export class ArchivedListItem {
         this.userIndex = userIndex;
         this.listId = listId;
 
+    }
+
+    /**
+     * Build the item from a persisted Mongo object
+     * 
+     * @param doc the stored BSON object 
+     * @returns an ArchivedListItem
+     */
+    static fromPersistedObject(doc: Document) {
+
+        return new ArchivedListItem(doc[F_LIST_ID], doc[F_NAME], doc[F_USER_INDEX], new Supermarket(doc[F_SUP_NAME], doc[F_SUP_LOCATION], doc[F_SUP_ID]))
     }
 
     static fromLocationListItem(listId: string, item: LocationListItem, supermarket: Supermarket) {
