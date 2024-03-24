@@ -10,6 +10,7 @@ import { TickLocationItem } from "./dlg/TickLocationItem";
 import { DeleteItem } from "./dlg/DeleteItem";
 import { GetNames } from "./dlg/GetNames";
 import { CloseShoppingList } from "./dlg/CloseShoppingList";
+import { SaveExample } from "./dlg/games/SaveExample";
 
 const api = new TotoAPIController("toto-ms-supermarket", new ControllerConfig())
 
@@ -24,6 +25,8 @@ api.path('PUT', '/supermarkets/:sid/items/:id/tick', new TickLocationItem())
 api.path('POST', '/supermarkets/:sid/close', new CloseShoppingList());
 
 api.path('GET', '/names', new GetNames())
+
+api.path('POST', '/games/sort/examples', new SaveExample())
 
 api.path('POST', '/events', new EventHandlerHook())
 

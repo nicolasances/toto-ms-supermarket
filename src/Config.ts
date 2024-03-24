@@ -12,6 +12,7 @@ const collections = {
     items: 'items',
     locationLists: 'locationLists', 
     archivedLists: 'archivedLists', 
+    trainingExamples: 'trainingExamples'
 };
 
 export class ControllerConfig implements TotoControllerConfig {
