@@ -9,9 +9,11 @@ export const F_ITEM_ID = 'itemId';  // Id of the item in the main supermarket li
 export const F_NAME = 'name';
 export const F_INDEX = 'index';
 export const F_USER_INDEX = 'userIndex';
+export const F_SUP_ID = 'supermarketId';
 export const F_SUP_NAME = 'supermarketName';
 export const F_SUP_LOCATION = 'supermarketLocation';
 export const F_TICKED = 'ticked';
+export const F_LIST_ID = "listId"
 
 export class ArchivedListStore {
 
@@ -59,6 +61,26 @@ export class ArchivedListStore {
 
         await this.db.collection(this.config.getCollections().archivedLists).insertMany(itemsToArchive)
 
+    }
+
+    /**
+     * Picks a number of random items from the archived lists
+     * 
+     * @param count the number of random items to sample
+     */
+    async sampleRandomItems(count: number): Promise<ArchivedListItem[]> {
+
+        const docs = await this.db.collection(this.config.getCollections().archivedLists).aggregate([{ $sample: { size: 2 } }]).toArray()
+
+        const samples = []
+
+        for (const doc of docs) {
+
+            samples.push(ArchivedListItem.fromPersistedObject(doc));
+
+        }
+
+        return samples;
     }
 
 }
