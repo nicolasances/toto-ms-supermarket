@@ -7,6 +7,8 @@ import { UserContext } from 'toto-api-controller/dist/model/UserContext';
 import { ExecutionContext } from 'toto-api-controller/dist/model/ExecutionContext';
 import { ControllerConfig } from '../../Config';
 import { correlationId } from '../../util/CorrelationId';
+import { ValidationError } from 'toto-api-controller/dist/validation/Validator';
+import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError';
 
 const storage = new Storage();
 
