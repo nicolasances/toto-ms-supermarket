@@ -12,11 +12,13 @@ export class AddItemToListProcess extends Process<{ id: string }> {
 
     execContext: ExecutionContext;
     item: ListItem;
+    authToken: string;
 
-    constructor(execContext: ExecutionContext, item: ListItem) {
+    constructor(authToken: string, execContext: ExecutionContext, item: ListItem) {
         super();
         this.execContext = execContext;
         this.item = item;
+        this.authToken = authToken;
     }
 
     async do(db: Db): Promise<{ id: string }> {
@@ -28,7 +30,7 @@ export class AddItemToListProcess extends Process<{ id: string }> {
         const itemId = await store.addItemToList(this.item);
 
         // Publish the event on PubSub
-        await new EventPublisher(this.execContext, "supermarket").publishEvent(itemId, "item-added", `Item [${this.item.id}] added to the Supermarket List`, this.item)
+        await new EventPublisher(this.execContext, "supermarket").publishEvent(itemId, "item-added", `Item [${this.item.id}] added to the Supermarket List`, { item: this.item, authToken: this.authToken })
 
         // Return the created Id
         return { id: itemId }

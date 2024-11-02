@@ -24,9 +24,11 @@ import { SupermarketMLModel } from "../api/SupermarketMLModel";
 export class AddItemAndSortProcess {
 
     execContext: ExecutionContext;
+    token: string;
 
-    constructor(execContext: ExecutionContext) {
+    constructor(token: string, execContext: ExecutionContext) {
         this.execContext = execContext;
+        this.token = token
     }
 
     async do(item: ListItem) {
@@ -46,7 +48,7 @@ export class AddItemAndSortProcess {
             const db = client.db(config.getDBName());
 
             const locationListStore = new LocationListStore(db, this.execContext);
-            const supermarketMLModel = new SupermarketMLModel(this.execContext);
+            const supermarketMLModel = new SupermarketMLModel(this.token, this.execContext);
 
             // 1. Get all the supermarkets (locations)
             const { supermarkets } = new SupermarketStore().getSupermarkets()

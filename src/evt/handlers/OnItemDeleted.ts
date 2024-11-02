@@ -1,9 +1,6 @@
-import { ControllerConfig } from "../../Config";
 import { AEventHandler, EventHandlingResult } from "../EventHanlder";
 import { TotoEvent } from "../TotoEvent";
 import { HandledEvents } from "../EventHandlerHook";
-import { basicallyHandleError } from "../../util/ErrorUtil";
-import { AddItemAndSortProcess } from "../../process/AddItemAndSortProcess";
 import { DeleteItemFromLocationLists } from "../../process/DeleteItemFromLocationLists";
 
 export class OnItemDeleted extends AEventHandler {

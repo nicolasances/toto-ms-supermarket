@@ -23,11 +23,12 @@ export class OnLocationListClosed extends AEventHandler {
         // Extract data
         const supermarketId = msg.id;
         let untickedItems = msg.data && msg.data.untickedItems ? msg.data.untickedItems : null;
+        const authToken = msg.data && msg.data.authToken
 
         logger.compute(cid, `Event [${msg.type}] received. Supermarket [${supermarketId}] Location List has been closed. Unticked items: [${JSON.stringify(untickedItems ?? {})}]`)
 
         // Instantiate the process
-        const process = new OnLocationListClosedProcess(this.execContext, supermarketId, untickedItems)
+        const process = new OnLocationListClosedProcess(authToken, this.execContext, supermarketId, untickedItems)
 
         // Run the process
         const result = await new MongoTransaction<EventHandlingResult>(this.execContext).execute(process);
@@ -43,12 +44,14 @@ class OnLocationListClosedProcess extends Process<EventHandlingResult> {
     execContext: ExecutionContext;
     supermarketId: string;
     untickedItems: LocationListItem[] | undefined;
+    authToken: string;
 
-    constructor(execContext: ExecutionContext, supermarketId: string, untickedItems?: LocationListItem[]) {
+    constructor(authToken: string, execContext: ExecutionContext, supermarketId: string, untickedItems?: LocationListItem[]) {
         super();
         this.execContext = execContext;
         this.supermarketId = supermarketId;
         this.untickedItems = untickedItems;
+        this.authToken = authToken;
     }
 
     async do(db: Db): Promise<EventHandlingResult> {
@@ -67,7 +70,7 @@ class OnLocationListClosedProcess extends Process<EventHandlingResult> {
 
             for (const untickedItem of this.untickedItems) {
 
-                await new AddItemToListProcess(this.execContext, untickedItem).do(db)
+                await new AddItemToListProcess(this.authToken, this.execContext, untickedItem).do(db)
             }
         }
 

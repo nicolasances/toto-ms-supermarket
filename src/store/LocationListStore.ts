@@ -65,12 +65,20 @@ export class LocationListStore {
     }
 
     /**
-     * Adds an item to a location list
+     * Adds an item to a location list. 
+     * Contextually shiftes all the items with (index >= this items' index) forward (increases all other indices of 1)
      * 
      * @param item the item to add
      */
     async addLocationListItem(item: LocationListItem): Promise<string> {
 
+        // Increase all indices >= item.index of 1
+        await this.db.collection(this.config.getCollections().locationLists).updateMany(
+            { index: { $gte: item.index } },
+            { $inc: { index: 1 } }
+        )
+
+        // Insert the new item
         const result = await this.db.collection(this.config.getCollections().locationLists).insertOne(item);
 
         return result.insertedId.toHexString();

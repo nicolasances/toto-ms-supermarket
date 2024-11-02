@@ -5,6 +5,7 @@ import { UserContext } from "toto-api-controller/dist/model/UserContext";
 import { ListItem } from "../model/ListItem";
 import { AddItemToListProcess } from "../process/AddItemToListProcess";
 import { MongoTransaction } from "../util/MongoTransaction";
+import { extractTokenFromHeader } from "../util/TokenExtract";
 
 export class AddItemToList implements TotoDelegate {
 
@@ -14,7 +15,7 @@ export class AddItemToList implements TotoDelegate {
         const item = ListItem.fromTransferObject(req.body);
 
         // Create the process to execute
-        const addItemProcess = new AddItemToListProcess(execContext, item);
+        const addItemProcess = new AddItemToListProcess(extractTokenFromHeader(req.headers)!, execContext, item);
 
         // Execute the process
         const { id } = await new MongoTransaction<{ id: string }>(execContext).execute(addItemProcess);

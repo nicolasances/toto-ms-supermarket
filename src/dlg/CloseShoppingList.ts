@@ -18,6 +18,7 @@ import { AddItemToListProcess } from "../process/AddItemToListProcess";
 import { MongoTransaction, Process } from "../util/MongoTransaction";
 import { Db } from "mongodb";
 import { LocationListItem } from "../model/LocationListItem";
+import { extractTokenFromHeader } from "../util/TokenExtract";
 
 /**
  * Closing the shopping list is typically used when there are still items in the location list. 
@@ -43,7 +44,7 @@ export class CloseShoppingList implements TotoDelegate {
         const supermarketId = req.params.sid;
 
         const result = new MongoTransaction<LocationListItem[]>(execContext).execute(
-            new CloseShoppingListProcess(execContext, supermarketId)
+            new CloseShoppingListProcess(extractTokenFromHeader(req.headers)!, execContext, supermarketId)
         );
 
         return { untickedItems: result }
@@ -56,11 +57,13 @@ class CloseShoppingListProcess extends Process<LocationListItem[]> {
 
     execContext: ExecutionContext;
     supermarketId: string;
+    authToken: string;
 
-    constructor(execContext: ExecutionContext, supermarketId: string) {
+    constructor(authToken: string, execContext: ExecutionContext, supermarketId: string) {
         super();
         this.execContext = execContext;
         this.supermarketId = supermarketId;
+        this.authToken = authToken;
     }
 
     async do(db: Db): Promise<LocationListItem[]> {
@@ -79,7 +82,7 @@ class CloseShoppingListProcess extends Process<LocationListItem[]> {
         await llstore.deleteUntickedItems();
 
         // 3. Shopping List is closed: 
-        await new EventPublisher(this.execContext, 'supermarket').publishEvent(this.supermarketId, `location-list-closed`, `A Location List has been closed.`, { untickedItems: untickedItems })
+        await new EventPublisher(this.execContext, 'supermarket').publishEvent(this.supermarketId, `location-list-closed`, `A Location List has been closed.`, { untickedItems: untickedItems, authToken: this.authToken })
 
         return untickedItems;
 
