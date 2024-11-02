@@ -1,7 +1,7 @@
 import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { ListItem } from "../model/ListItem";
 import { LocationListItem } from "../model/LocationListItem";
-import request from "request";
+import http from "request";
 
 export class SupermarketMLModel {
 
@@ -58,7 +58,7 @@ export class SupermarketMLModel {
 
         return new Promise((success, failure) => {
 
-            request({
+            http({
                 uri: `${this.endpoint}/predict`,
                 method: 'POST',
                 headers: {
