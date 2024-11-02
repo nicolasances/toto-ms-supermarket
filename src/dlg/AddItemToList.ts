@@ -14,6 +14,8 @@ export class AddItemToList implements TotoDelegate {
         // Create the item
         const item = ListItem.fromTransferObject(req.body);
 
+        execContext.logger.compute(execContext.cid, `Adding item to the supermarket list: ${item}`)
+
         // Create the process to execute
         const addItemProcess = new AddItemToListProcess(extractTokenFromHeader(req.headers)!, execContext, item);
 
