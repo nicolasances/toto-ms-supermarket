@@ -76,7 +76,7 @@ export class AddItemAndSortProcess {
                     // TODO: this will return a sorted list that just needs to be saved
                     const predictedIndex = await supermarketMLModel.predictItemPosition(item, llitems)
 
-                    logger.compute(cid, `Item is position at predicted index [${predictedIndex}]`)
+                    logger.compute(cid, `Item is positionned at predicted index [${predictedIndex}]`)
 
                     // Add & Save
                     await locationListStore.addLocationListItem(LocationListItem.fromListItem(item, supermarket, predictedIndex))

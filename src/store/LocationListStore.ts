@@ -74,7 +74,11 @@ export class LocationListStore {
 
         // Increase all indices >= item.index of 1
         await this.db.collection(this.config.getCollections().locationLists).updateMany(
-            { index: { $gte: item.index } },
+            {
+                supermarketName: item.supermarketName,
+                supermarketLocation: item.supermarketLocation,
+                index: { $gte: item.index }
+            },
             { $inc: { index: 1 } }
         )
 
