@@ -63,11 +63,13 @@ export class SupermarketMLModel {
                 method: 'POST',
                 headers: {
                     'x-correlation-id': this.cid,
-                    'Authorization': `Bearer ${this.token}`
+                    'Authorization': `Bearer ${this.token}`, 
+                    'toto-service': 'toto-ml-supito', 
+                    'Content-Type': 'application/json'
                 },
-                body: {
+                body: JSON.stringify({
                     items: [item, otherItem]
-                }
+                })
             }, (err: any, resp: any, body: any) => {
 
                 if (err) {
