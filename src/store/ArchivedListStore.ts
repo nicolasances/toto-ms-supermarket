@@ -13,7 +13,8 @@ export const F_SUP_ID = 'supermarketId';
 export const F_SUP_NAME = 'supermarketName';
 export const F_SUP_LOCATION = 'supermarketLocation';
 export const F_TICKED = 'ticked';
-export const F_LIST_ID = "listId"
+export const F_LIST_ID = "listId";
+export const F_DATE = "date";
 
 export class ArchivedListStore {
 

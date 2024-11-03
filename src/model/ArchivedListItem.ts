@@ -3,7 +3,8 @@ import { Supermarket } from "./Supermarket"
 import { ListItem } from "./ListItem"
 import { ValidationError } from "toto-api-controller/dist/validation/Validator"
 import { LocationListItem } from "./LocationListItem"
-import { F_LIST_ID, F_NAME, F_SUP_ID, F_SUP_LOCATION, F_SUP_NAME, F_USER_INDEX } from "../store/ArchivedListStore"
+import { F_DATE, F_LIST_ID, F_NAME, F_SUP_ID, F_SUP_LOCATION, F_SUP_NAME, F_USER_INDEX } from "../store/ArchivedListStore"
+import moment from "moment-timezone"
 
 export const DEFAULT_USER_INDEX = -1
 
@@ -16,8 +17,9 @@ export class ArchivedListItem {
     supermarketName: string
     supermarketLocation: string
     userIndex: number               // This is the index that the user assigned to the item, by clicking on it
+    date?: string                   // Date in YYYYMMDD in which the item was archived
 
-    constructor(listId: string, name: string, userIndex: number, supermarket: Supermarket) {
+    constructor(listId: string, name: string, userIndex: number, supermarket: Supermarket, date?: string) {
 
         this.name = name;
         this.supermarketId = supermarket.id!;
@@ -25,6 +27,7 @@ export class ArchivedListItem {
         this.supermarketLocation = supermarket.location;
         this.userIndex = userIndex;
         this.listId = listId;
+        this.date = date;
 
     }
 
@@ -36,12 +39,12 @@ export class ArchivedListItem {
      */
     static fromPersistedObject(doc: Document) {
 
-        return new ArchivedListItem(doc[F_LIST_ID], doc[F_NAME], doc[F_USER_INDEX], new Supermarket(doc[F_SUP_NAME], doc[F_SUP_LOCATION], doc[F_SUP_ID]))
+        return new ArchivedListItem(doc[F_LIST_ID], doc[F_NAME], doc[F_USER_INDEX], new Supermarket(doc[F_SUP_NAME], doc[F_SUP_LOCATION], doc[F_SUP_ID]), doc[F_DATE])
     }
 
     static fromLocationListItem(listId: string, item: LocationListItem, supermarket: Supermarket) {
 
-        return new ArchivedListItem(listId, item.name, item.userIndex, supermarket);
+        return new ArchivedListItem(listId, item.name, item.userIndex, supermarket, moment().tz("Europe/Rome").format("YYYYMMDD"));
 
     }
 
