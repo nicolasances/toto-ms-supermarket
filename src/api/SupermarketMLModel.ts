@@ -31,20 +31,22 @@ export class SupermarketMLModel {
      */
     async predictItemPosition(item: ListItem, locationList: LocationListItem[]): Promise<number> {
 
-        const logger = this.execContext.logger;
-
-        if (locationList.length == 0) return 0
-
-        for (let otherItem of locationList) {
-
-            const isBefore = await this.isItemBefore(item.name, otherItem.name);
-
-            logger.compute(this.cid, `Comparing [${item.name}, ${otherItem.name}]. Before: ${isBefore}`)
-
-            if (isBefore) return otherItem.index;
-        }
-
         return locationList.length;
+
+        // const logger = this.execContext.logger;
+
+        // if (locationList.length == 0) return 0
+
+        // for (let otherItem of locationList) {
+
+        //     const isBefore = await this.isItemBefore(item.name, otherItem.name);
+
+        //     logger.compute(this.cid, `Comparing [${item.name}, ${otherItem.name}]. Before: ${isBefore}`)
+
+        //     if (isBefore) return otherItem.index;
+        // }
+
+        // return locationList.length;
     }
 
     /** 

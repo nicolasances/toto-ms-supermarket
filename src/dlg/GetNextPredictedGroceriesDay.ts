@@ -21,7 +21,6 @@ export class GetNextPredictedGroceriesDay implements TotoDelegate {
     async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
 
         const config = execContext.config as ControllerConfig
-        const supermarketId = req.params.id;
 
         let client;
 
