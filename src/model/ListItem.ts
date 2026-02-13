@@ -1,5 +1,5 @@
 import { Document, WithId } from "mongodb";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
+import { ValidationError } from "totoms";
 
 export class ListItem {
 

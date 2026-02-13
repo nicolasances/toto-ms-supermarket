@@ -1,13 +1,12 @@
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { ListItem } from "../model/ListItem";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
-import { TotoRuntimeError } from "toto-api-controller/dist/model/TotoRuntimeError";
+import { ValidationError, TotoRuntimeError } from "totoms";
 import { ControllerConfig } from "../Config";
 import { SupermarketStore } from "../store/SupermarketStore";
 import { MongoClient } from "mongodb";
 import { LocationListStore } from "../store/LocationListStore";
 import { LocationListItem } from "../model/LocationListItem";
 import { SupermarketMLModel } from "../api/SupermarketMLModel";
+import { Logger } from "totoms";
 
 /**
  * This process deletes an item from all location lists
@@ -15,29 +14,29 @@ import { SupermarketMLModel } from "../api/SupermarketMLModel";
  */
 export class DeleteItemFromLocationLists {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
 
-    constructor(execContext: ExecutionContext) {
-        this.execContext = execContext;
+    constructor(config: ControllerConfig, cid: string) {
+        this.config = config;
+        this.cid = cid;
     }
 
     async do(itemId: string) {
 
-        const config = this.execContext.config as ControllerConfig
-        const logger = this.execContext.logger;
-        const cid = this.execContext.cid;
+        const logger = Logger.getInstance();
 
         let client;
 
-        logger.compute(cid, `Deleting list item [${itemId}] from all Location Lists.`)
+        logger.compute(this.cid, `Deleting list item [${itemId}] from all Location Lists.`)
 
         try {
 
             // Instantiate the DB
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
+            client = await this.config.getMongoClient();
+            const db = client.db(this.config.getDBName());
 
-            const locationListStore = new LocationListStore(db, this.execContext);
+            const locationListStore = new LocationListStore(db, this.config, this.cid);
 
             // Delete item from all lists
             await locationListStore.deleteItemFromAllLists(itemId)

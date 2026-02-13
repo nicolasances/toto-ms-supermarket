@@ -1,32 +1,34 @@
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
+import { ControllerConfig } from "../Config";
 import { LocationListStore } from "../store/LocationListStore";
 import { Process } from "../util/MongoTransaction";
 import { Db } from "mongodb";
+import { Logger } from "totoms";
 
 export class DeleteAllLocationListsProcess extends Process<void> {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
 
-    constructor(execContext: ExecutionContext) {
+    constructor(config: ControllerConfig, cid: string) {
         super();
-        this.execContext = execContext;
+        this.config = config;
+        this.cid = cid;
     }
 
     async do(db: Db) {
 
-        const logger = this.execContext.logger;
-        const cid = this.execContext.cid;
+        const logger = Logger.getInstance();
 
         // Instantiate stores
-        const locationListStore = new LocationListStore(db, this.execContext);
+        const locationListStore = new LocationListStore(db, this.cid, this.config);
 
-        logger.compute(cid, `Deleting all Location Lists.`)
+        logger.compute(this.cid, `Deleting all Location Lists.`)
 
         // Delete all Location Lists
         await locationListStore.deleteAllLocationLists()
 
         // Done
-        logger.compute(cid, `All Location Lists deleted.`)
+        logger.compute(this.cid, `All Location Lists deleted.`)
 
     }
 }

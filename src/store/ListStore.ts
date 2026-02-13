@@ -1,18 +1,17 @@
 import { Db, ObjectId } from "mongodb";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { ControllerConfig } from "../Config";
 import { ListItem } from "../model/ListItem";
 
 export class ListStore {
 
     db: Db;
-    execContext: ExecutionContext;
+    cid: string;
     config: ControllerConfig;
 
-    constructor(db: Db, execContext: ExecutionContext) {
+    constructor(db: Db, cid: string, config: ControllerConfig) {
         this.db = db;
-        this.config = execContext.config as ControllerConfig;
-        this.execContext = execContext;
+        this.cid = cid;
+        this.config = config;
     }
 
     /**

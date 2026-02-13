@@ -23,7 +23,7 @@
     "mongodb": "^6.2.0",
     "path": "^0.12.7",
     "request": "^2.88.2",
-    "toto-api-controller": "^11.0.2",
+    "totoms": "^2.0.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

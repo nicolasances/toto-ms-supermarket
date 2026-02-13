@@ -1,33 +1,35 @@
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
+import { ControllerConfig } from "../Config";
 import { ListStore } from "../store/ListStore";
 import { Db } from "mongodb";
 import { Process } from "../util/MongoTransaction";
+import { Logger } from "totoms";
 
 
 export class DeleteMainSupermarketListProcess extends Process<void> {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
 
-    constructor(execContext: ExecutionContext) {
+    constructor(config: ControllerConfig, cid: string) {
         super();
-        this.execContext = execContext;
+        this.config = config;
+        this.cid = cid;
     }
 
     async do(db: Db) {
 
-        const logger = this.execContext.logger;
-        const cid = this.execContext.cid;
+        const logger = Logger.getInstance();
 
         // Instantiate stores
-        const store = new ListStore(db, this.execContext);
+        const store = new ListStore(db, this.cid, this.config);
 
-        logger.compute(cid, `Deleting all items in the Main List.`)
+        logger.compute(this.cid, `Deleting all items in the Main List.`)
 
         // Delete all Location Lists
         await store.deleteAllItems();
 
         // Done
-        logger.compute(cid, `All items in the Main Supermarket List deleted.`)
+        logger.compute(this.cid, `All items in the Main Supermarket List deleted.`)
 
     }
 }

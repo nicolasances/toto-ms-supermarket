@@ -1,6 +1,6 @@
 import { Request } from "express"
 import moment from "moment-timezone"
-import { ValidationError } from "toto-api-controller/dist/validation/Validator"
+import { ValidationError } from "totoms"
 
 
 export class TrainingExample {

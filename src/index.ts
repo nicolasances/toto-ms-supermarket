@@ -1,4 +1,4 @@
-import { TotoAPIController } from "toto-api-controller";
+import { TotoMicroservice, TotoMicroserviceConfiguration, getHyperscalerConfiguration, SupportedHyperscalers } from "totoms";
 import { ControllerConfig } from "./Config";
 import { AddItemToList } from "./dlg/AddItemToList";
 import { UpdateItem } from "./dlg/UpdateItem";
@@ -15,29 +15,40 @@ import { NextRound } from "./dlg/games/NextRound";
 import { StartBackup } from "./dlg/backup/StartBackup";
 import { GetNextPredictedGroceriesDay } from "./dlg/GetNextPredictedGroceriesDay";
 
-const api = new TotoAPIController("toto-ms-supermarket", new ControllerConfig())
+const config: TotoMicroserviceConfiguration = {
+    serviceName: "toto-ms-supermarket",
+    basePath: '/supermarket',
+    environment: {
+        hyperscaler: (process.env.HYPERSCALER as SupportedHyperscalers) || "gcp",
+        hyperscalerConfiguration: getHyperscalerConfiguration()
+    },
+    customConfiguration: ControllerConfig,
+    apiConfiguration: {
+        apiEndpoints: [
+            { method: 'GET', path: '/list/items', delegate: GetItems },
+            { method: 'POST', path: '/list/items', delegate: AddItemToList },
+            { method: 'PUT', path: '/list/items/:id', delegate: UpdateItem },
+            { method: 'DELETE', path: '/list/items/:id', delegate: DeleteItem },
+            
+            { method: 'GET', path: '/supermarkets', delegate: GetSupermarkets },
+            { method: 'GET', path: '/supermarkets/:id/items', delegate: GetLocationList },
+            { method: 'PUT', path: '/supermarkets/:sid/items/:id/tick', delegate: TickLocationItem },
+            { method: 'POST', path: '/supermarkets/:sid/close', delegate: CloseShoppingList },
+            
+            { method: 'GET', path: '/names', delegate: GetNames },
+            
+            { method: 'GET', path: '/predictions/nesu', delegate: GetNextPredictedGroceriesDay },
+            
+            { method: 'POST', path: '/games/sort/examples', delegate: SaveExample },
+            { method: 'GET', path: '/games/sort/next', delegate: NextRound },
+            
+            { method: 'POST', path: '/backup', delegate: StartBackup },
+            
+            { method: 'POST', path: '/events', delegate: EventHandlerHook }
+        ]
+    }
+};
 
-api.path('GET', '/list/items', new GetItems())
-api.path('POST', '/list/items', new AddItemToList())
-api.path('PUT', '/list/items/:id', new UpdateItem())
-api.path('DELETE', '/list/items/:id', new DeleteItem())
-
-api.path('GET', '/supermarkets', new GetSupermarkets())
-api.path('GET', '/supermarkets/:id/items', new GetLocationList())
-api.path('PUT', '/supermarkets/:sid/items/:id/tick', new TickLocationItem())
-api.path('POST', '/supermarkets/:sid/close', new CloseShoppingList());
-
-api.path('GET', '/names', new GetNames())
-
-api.path('GET', '/predictions/nesu', new GetNextPredictedGroceriesDay());
-
-api.path('POST', '/games/sort/examples', new SaveExample())
-api.path('GET', '/games/sort/next', new NextRound())
-
-api.path("POST", "/backup", new StartBackup())
-
-api.path('POST', '/events', new EventHandlerHook())
-
-api.init().then(() => {
-    api.listen()
+TotoMicroservice.init(config).then(microservice => {
+    microservice.start();
 });

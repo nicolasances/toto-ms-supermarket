@@ -1,5 +1,4 @@
 import { Db, ObjectId } from "mongodb";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { ControllerConfig } from "../Config";
 import { Supermarket } from "../model/Supermarket";
 import { LocationListItem } from "../model/LocationListItem";
@@ -15,13 +14,13 @@ export const F_TICKED = 'ticked';
 export class LocationListStore {
 
     db: Db;
-    execContext: ExecutionContext;
+    cid: string;
     config: ControllerConfig;
 
-    constructor(db: Db, execContext: ExecutionContext) {
+    constructor(db: Db, cid: string, config: ControllerConfig) {
         this.db = db;
-        this.config = execContext.config as ControllerConfig;
-        this.execContext = execContext;
+        this.cid = cid;
+        this.config = config;
     }
 
     /**

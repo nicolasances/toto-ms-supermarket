@@ -2,7 +2,7 @@ import { Document, WithId } from "mongodb"
 import { Supermarket } from "./Supermarket"
 import { ListItem } from "./ListItem"
 import { F_INDEX, F_ITEM_ID, F_NAME, F_SUP_LOCATION, F_SUP_NAME, F_TICKED, F_USER_INDEX } from "../store/LocationListStore"
-import { ValidationError } from "toto-api-controller/dist/validation/Validator"
+import { ValidationError } from "totoms"
 
 export const DEFAULT_USER_INDEX = -1
 
