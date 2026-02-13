@@ -41,13 +41,10 @@ export class TickLocationItem extends TotoDelegate<TickLocationItemRequest, Tick
         const itemId = req.id;
         const ticked = req.ticked;
 
-        let client;
-
         try {
 
             // Instantiate the DB
             const db = await config.getMongoDb(config.getDBName());
-            client = await config.getMongoClient(config.getDBName());
 
             // Create the stores
             const supermarketStore = new SupermarketStore();
@@ -84,9 +81,6 @@ export class TickLocationItem extends TotoDelegate<TickLocationItemRequest, Tick
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
 
     }

@@ -21,13 +21,10 @@ export class DeleteItem extends TotoDelegate<DeleteItemRequest, DeleteItemRespon
 
         const itemId = req.id;
 
-        let client;
-
         try {
 
             // Instantiate the DB
             const db = await config.getMongoDb(config.getDBName());
-            client = await config.getMongoClient(config.getDBName());
 
             // Create the store
             const store = new ListStore(db, this.cid!, config);
@@ -50,9 +47,6 @@ export class DeleteItem extends TotoDelegate<DeleteItemRequest, DeleteItemRespon
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
 
     }

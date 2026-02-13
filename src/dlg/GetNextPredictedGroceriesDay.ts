@@ -23,13 +23,10 @@ export class GetNextPredictedGroceriesDay extends TotoDelegate<GetNextPredictedG
         const config = this.config as ControllerConfig;
         const logger = Logger.getInstance();
 
-        let client;
-
         try {
 
             // Instantiate the DB
             const db = await config.getMongoDb(config.getDBName());
-            client = await config.getMongoClient(config.getDBName());
 
             return { predictedDays: 2 }
 
@@ -43,9 +40,6 @@ export class GetNextPredictedGroceriesDay extends TotoDelegate<GetNextPredictedG
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
 
     }

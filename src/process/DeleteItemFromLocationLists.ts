@@ -26,15 +26,12 @@ export class DeleteItemFromLocationLists {
 
         const logger = Logger.getInstance();
 
-        let client;
-
         logger.compute(this.cid, `Deleting list item [${itemId}] from all Location Lists.`)
 
         try {
 
             // Instantiate the DB
             const db = await this.config.getMongoDb(this.config.getDBName());
-            client = await this.config.getMongoClient(this.config.getDBName());
 
             const locationListStore = new LocationListStore(db, this.cid, this.config);
 
@@ -44,7 +41,7 @@ export class DeleteItemFromLocationLists {
 
         } catch (error) {
 
-            if (error instanceof ValidationError || error instanceof TotoRuntimeError) {
+            if (error instanceof ValidationError) {
                 throw error;
             }
             else {
@@ -52,9 +49,6 @@ export class DeleteItemFromLocationLists {
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
     }
 

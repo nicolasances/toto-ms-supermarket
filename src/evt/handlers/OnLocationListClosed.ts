@@ -9,6 +9,7 @@ import { MongoTransaction, Process } from "../../util/MongoTransaction";
 import { Db } from "mongodb";
 import { Logger } from "totoms";
 import { LocationListItem } from "../../model/LocationListItem";
+import { ControllerConfig } from "../../Config";
 
 export class OnLocationListClosed extends AEventHandler {
 
@@ -41,13 +42,13 @@ export class OnLocationListClosed extends AEventHandler {
 
 class OnLocationListClosedProcess extends Process<EventHandlingResult> {
 
-    config: any;
+    config: ControllerConfig;
     cid: string;
     supermarketId: string;
     untickedItems: LocationListItem[] | undefined;
     authToken: string;
 
-    constructor(authToken: string, config: any, cid: string, supermarketId: string, untickedItems?: LocationListItem[]) {
+    constructor(authToken: string, config: ControllerConfig, cid: string, supermarketId: string, untickedItems?: LocationListItem[]) {
         super();
         this.config = config;
         this.cid = cid;

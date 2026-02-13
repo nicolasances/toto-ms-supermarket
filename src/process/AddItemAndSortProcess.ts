@@ -36,15 +36,12 @@ export class AddItemAndSortProcess {
 
         const logger = Logger.getInstance();
 
-        let client;
-
         logger.compute(this.cid, `Adding list item [${JSON.stringify(item)}] to Location Lists and re-sorting.`)
 
         try {
 
             // Instantiate the DB
             const db = await this.config.getMongoDb(this.config.getDBName());
-            client = await this.config.getMongoClient(this.config.getDBName());
 
             const locationListStore = new LocationListStore(db, this.cid, this.config);
             const supermarketMLModel = new SupermarketMLModel(this.token, this.config, this.cid);
@@ -95,9 +92,6 @@ export class AddItemAndSortProcess {
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
     }
 

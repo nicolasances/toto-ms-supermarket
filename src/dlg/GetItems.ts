@@ -18,12 +18,10 @@ export class GetItems extends TotoDelegate<GetItemsRequest, GetItemsResponse> {
         const config = this.config as ControllerConfig;
         const logger = Logger.getInstance();
 
-        let db;
-
         try {
 
             // Instantiate the DB
-            db = await config.getMongoDb(config.getDBName());
+            const db = await config.getMongoDb(config.getDBName());
 
             // Create the store
             const store = new ListStore(db, this.cid!, config);
@@ -43,9 +41,6 @@ export class GetItems extends TotoDelegate<GetItemsRequest, GetItemsResponse> {
                 throw error;
             }
 
-        }
-        finally {
-            if (db) await config.getMongoClient(config.getDBName()).then(client => client.close());
         }
 
     }

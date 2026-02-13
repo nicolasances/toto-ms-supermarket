@@ -26,8 +26,6 @@ export class StartBackup extends TotoDelegate<StartBackupRequest, StartBackupRes
         const today = moment()
         const twoDaysAgo = moment().add(-2, "days");
 
-        let client;
-
         try {
 
             logger.compute(cid, `Starting Database Backup`)
@@ -35,7 +33,6 @@ export class StartBackup extends TotoDelegate<StartBackupRequest, StartBackupRes
             const config = this.config as ControllerConfig;
 
             const db = await config.getMongoDb(config.getDBName());
-            client = await config.getMongoClient(config.getDBName());
 
             // Iterate through the relevant collections
             for (let collection of Object.keys(config.getCollections())) {
@@ -94,9 +91,6 @@ export class StartBackup extends TotoDelegate<StartBackupRequest, StartBackupRes
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
     }
 

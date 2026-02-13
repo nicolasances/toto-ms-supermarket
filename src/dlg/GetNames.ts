@@ -27,13 +27,10 @@ export class GetNames extends TotoDelegate<GetNamesRequest, GetNamesResponse> {
         const config = this.config as ControllerConfig;
         const logger = Logger.getInstance();
 
-        let client;
-
         try {
 
             // Instantiate the DB
             const db = await config.getMongoDb(config.getDBName());
-            client = await config.getMongoClient(config.getDBName());
 
             // Create the store
             const store = new ArchivedListStore(db, this.cid!, config);
@@ -54,9 +51,6 @@ export class GetNames extends TotoDelegate<GetNamesRequest, GetNamesResponse> {
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
 
     }
