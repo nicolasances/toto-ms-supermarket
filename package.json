@@ -4,13 +4,15 @@
   "description": "Toto Supermarket API",
   "main": "index.js",
   "scripts": {
-    "start:dev": "npx nodemon",
+    "dev": "npx nodemon",
     "build": "rm -rf ./build && tsc",
     "start": "node build/index.js"
   },
   "author": "nicolasances",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.989.0",
+    "@aws-sdk/client-sns": "^3.989.0",
     "@google-cloud/pubsub": "^4.0.6",
     "@google-cloud/secret-manager": "^5.0.1",
     "@google-cloud/storage": "^7.9.0",

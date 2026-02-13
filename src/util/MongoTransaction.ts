@@ -14,13 +14,9 @@ export class MongoTransaction<T> {
     }
 
     async execute(process: Process<T>): Promise<T> {
-
-        let client;
-
         try {
 
             // Instantiate the DB
-            client = await this.config.getMongoClient(this.config.getDBName());
             const db = await this.config.getMongoDb(this.config.getDBName());
 
             // Execute the process
@@ -36,9 +32,6 @@ export class MongoTransaction<T> {
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
 
     }
