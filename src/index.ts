@@ -12,6 +12,8 @@ import { GetNames } from "./dlg/GetNames";
 import { CloseShoppingList } from "./dlg/CloseShoppingList";
 import { SaveExample } from "./dlg/games/SaveExample";
 import { NextRound } from "./dlg/games/NextRound";
+import { StartBackup } from "./dlg/backup/StartBackup";
+import { GetNextPredictedGroceriesDay } from "./dlg/GetNextPredictedGroceriesDay";
 
 const api = new TotoAPIController("toto-ms-supermarket", new ControllerConfig())
 
@@ -27,8 +29,12 @@ api.path('POST', '/supermarkets/:sid/close', new CloseShoppingList());
 
 api.path('GET', '/names', new GetNames())
 
+api.path('GET', '/predictions/nesu', new GetNextPredictedGroceriesDay());
+
 api.path('POST', '/games/sort/examples', new SaveExample())
 api.path('GET', '/games/sort/next', new NextRound())
+
+api.path("POST", "/backup", new StartBackup())
 
 api.path('POST', '/events', new EventHandlerHook())
 

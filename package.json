@@ -13,7 +13,7 @@
   "dependencies": {
     "@google-cloud/pubsub": "^4.0.6",
     "@google-cloud/secret-manager": "^5.0.1",
-    "@google-cloud/storage": "^7.3.1",
+    "@google-cloud/storage": "^7.9.0",
     "body-parser": "^1.18.2",
     "connect-busboy": "^1.0.0",
     "express": "^4.16.2",
