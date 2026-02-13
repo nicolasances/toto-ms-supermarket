@@ -43,10 +43,10 @@ export class AddItemAndSortProcess {
         try {
 
             // Instantiate the DB
-            client = await this.config.getMongoClient();
-            const db = client.db(this.config.getDBName());
+            const db = await this.config.getMongoDb(this.config.getDBName());
+            client = await this.config.getMongoClient(this.config.getDBName());
 
-            const locationListStore = new LocationListStore(db, this.config, this.cid);
+            const locationListStore = new LocationListStore(db, this.cid, this.config);
             const supermarketMLModel = new SupermarketMLModel(this.token, this.config, this.cid);
 
             // 1. Get all the supermarkets (locations)

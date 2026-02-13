@@ -33,10 +33,10 @@ export class DeleteItemFromLocationLists {
         try {
 
             // Instantiate the DB
-            client = await this.config.getMongoClient();
-            const db = client.db(this.config.getDBName());
+            const db = await this.config.getMongoDb(this.config.getDBName());
+            client = await this.config.getMongoClient(this.config.getDBName());
 
-            const locationListStore = new LocationListStore(db, this.config, this.cid);
+            const locationListStore = new LocationListStore(db, this.cid, this.config);
 
             // Delete item from all lists
             await locationListStore.deleteItemFromAllLists(itemId)

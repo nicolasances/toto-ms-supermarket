@@ -1,34 +1,39 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
 import { ListStore } from "../store/ListStore";
 import { ListItem } from "../model/ListItem";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
-import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError'
 import { EventPublisher } from "../evt/EventPublisher";
 import { SupermarketStore } from "../store/SupermarketStore";
 import { LocationListStore } from "../store/LocationListStore";
 
-export class GetLocationList implements TotoDelegate {
+interface GetLocationListRequest extends TotoRequest {
+    id: string;
+}
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+interface GetLocationListResponse {
+    items: any[];
+}
 
-        const config = execContext.config as ControllerConfig
-        const supermarketId = req.params.id;
+export class GetLocationList extends TotoDelegate<GetLocationListRequest, GetLocationListResponse> {
+
+    async do(req: GetLocationListRequest, userContext?: UserContext): Promise<GetLocationListResponse> {
+
+        const config = this.config as ControllerConfig;
+        const logger = Logger.getInstance();
+        const supermarketId = req.id;
 
         let client;
 
         try {
 
             // Instantiate the DB
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
+            const db = await config.getMongoDb(config.getDBName());
+            client = await config.getMongoClient(config.getDBName());
 
             // Create the stores
             const supermarketStore = new SupermarketStore()
-            const locationListStore = new LocationListStore(db, execContext);
+            const locationListStore = new LocationListStore(db, this.cid!, config);
 
             // Get the supermarket
             const supermarket = await supermarketStore.getSupermarket(supermarketId);
@@ -40,11 +45,11 @@ export class GetLocationList implements TotoDelegate {
 
         } catch (error) {
 
-            if (error instanceof ValidationError || error instanceof TotoRuntimeError) {
+            if (error instanceof ValidationError) {
                 throw error;
             }
             else {
-                console.log(error);
+                logger.compute(this.cid, `Error getting location list: ${error}`);
                 throw error;
             }
 
@@ -53,6 +58,12 @@ export class GetLocationList implements TotoDelegate {
             if (client) client.close();
         }
 
+    }
+
+    parseRequest(req: Request): GetLocationListRequest {
+        return {
+            id: req.params.id
+        };
     }
 
 }

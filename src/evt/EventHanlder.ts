@@ -1,12 +1,14 @@
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
+import { ControllerConfig } from "../Config";
 import { TotoEvent } from "./TotoEvent";
 
 export abstract class AEventHandler {
     
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
 
-    constructor(execContext: ExecutionContext) {
-        this.execContext = execContext;
+    constructor(config: ControllerConfig, cid: string) {
+        this.config = config;
+        this.cid = cid;
     }
 
     abstract handleEvent(msg: TotoEvent): Promise<EventHandlingResult>

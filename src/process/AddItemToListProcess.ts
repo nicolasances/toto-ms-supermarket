@@ -24,7 +24,7 @@ export class AddItemToListProcess extends Process<{ id: string }> {
     async do(db: Db): Promise<{ id: string }> {
 
         // Create the store
-        const store = new ListStore(db, this.config, this.cid);
+        const store = new ListStore(db, this.cid, this.config);
 
         // Save the item
         const itemId = await store.addItemToList(this.item);

@@ -1,4 +1,4 @@
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
+import { ControllerConfig } from "../Config";
 import { ListItem } from "../model/ListItem";
 import { LocationListItem } from "../model/LocationListItem";
 import http from "request";
@@ -6,14 +6,14 @@ import http from "request";
 export class SupermarketMLModel {
 
     endpoint: string;
-    execContext: ExecutionContext;
-    cid?: string;
+    config: ControllerConfig;
+    cid: string;
     token: string;
 
-    constructor(token: string, execContext: ExecutionContext) {
+    constructor(token: string, config: ControllerConfig, cid: string) {
         this.endpoint = process.env["SUPITO_API_ENDPOINT"]!
-        this.execContext = execContext;
-        this.cid = execContext.cid;
+        this.config = config;
+        this.cid = cid;
         this.token = token;
     }
 

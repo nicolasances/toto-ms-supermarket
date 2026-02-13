@@ -1,14 +1,16 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
-import { ListStore } from "../store/ListStore";
 import { ListItem } from "../model/ListItem";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
-import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError'
 import { EventPublisher } from "../evt/EventPublisher";
 import { ArchivedListStore } from "../store/ArchivedListStore";
+
+interface GetNamesRequest extends TotoRequest {
+}
+
+interface GetNamesResponse {
+    names: string[];
+}
 
 /**
  * Gets the item names from all archived lists. 
@@ -18,22 +20,23 @@ import { ArchivedListStore } from "../store/ArchivedListStore";
  *  - Creating a dictionnary of terms for ML training
  * 
  */
-export class GetNames implements TotoDelegate {
+export class GetNames extends TotoDelegate<GetNamesRequest, GetNamesResponse> {
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+    async do(req: GetNamesRequest, userContext?: UserContext): Promise<GetNamesResponse> {
 
-        const config = execContext.config as ControllerConfig
+        const config = this.config as ControllerConfig;
+        const logger = Logger.getInstance();
 
         let client;
 
         try {
 
             // Instantiate the DB
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
+            const db = await config.getMongoDb(config.getDBName());
+            client = await config.getMongoClient(config.getDBName());
 
             // Create the store
-            const store = new ArchivedListStore(db, execContext);
+            const store = new ArchivedListStore(db, this.cid!, config);
 
             // Get the names
             const names = await store.getDistinctItemNames(300);
@@ -43,11 +46,11 @@ export class GetNames implements TotoDelegate {
 
         } catch (error) {
 
-            if (error instanceof ValidationError || error instanceof TotoRuntimeError) {
+            if (error instanceof ValidationError) {
                 throw error;
             }
             else {
-                console.log(error);
+                logger.compute(this.cid, `Error getting names: ${error}`);
                 throw error;
             }
 
@@ -56,6 +59,10 @@ export class GetNames implements TotoDelegate {
             if (client) client.close();
         }
 
+    }
+
+    parseRequest(req: Request): GetNamesRequest {
+        return {};
     }
 
 }

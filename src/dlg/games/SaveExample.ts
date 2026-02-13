@@ -1,11 +1,17 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { MongoTransaction, Process } from "../../util/MongoTransaction";
 import { Db } from "mongodb";
 import { ControllerConfig } from "../../Config";
 import { TrainingExample } from "../../model/games/TrainingExample";
+
+interface SaveExampleRequest extends TotoRequest {
+    example: TrainingExample;
+}
+
+interface SaveExampleResponse {
+    id: string;
+}
 
 /**
  * Saves an example that Toto Suppie can learn from. 
@@ -14,37 +20,44 @@ import { TrainingExample } from "../../model/games/TrainingExample";
  * It is saved so that Toto can save from it.
  * 
  */
-export class SaveExample implements TotoDelegate {
+export class SaveExample extends TotoDelegate<SaveExampleRequest, SaveExampleResponse> {
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+    async do(req: SaveExampleRequest, userContext?: UserContext): Promise<SaveExampleResponse> {
 
-        const example = TrainingExample.fromHttpRequest(req);
+        const config = this.config as ControllerConfig;
 
-        const result = await new MongoTransaction<{ insertedId: string }>(execContext).execute(
-            new SaveExampleProcess(execContext, example)
+        const result = await new MongoTransaction<{ insertedId: string }>(config, this.cid!).execute(
+            new SaveExampleProcess(config, this.cid!, req.example)
         );
 
         return { id: result.insertedId }
 
     }
 
+    parseRequest(req: Request): SaveExampleRequest {
+        return {
+            example: TrainingExample.fromHttpRequest(req)
+        };
+    }
+
 }
 
-class SaveExampleProcess implements Process<{ insertedId: string }> {
+class SaveExampleProcess extends Process<{ insertedId: string }> {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
     example: TrainingExample;
 
-    constructor(execContext: ExecutionContext, example: TrainingExample) {
-        this.execContext = execContext;
+    constructor(config: ControllerConfig, cid: string, example: TrainingExample) {
+        super();
+        this.config = config;
+        this.cid = cid;
         this.example = example;
     }
 
     async do(db: Db): Promise<{ insertedId: string; }> {
 
-        const config = this.execContext.config as ControllerConfig;
-
-        const { insertedId } = await db.collection(config.getCollections().trainingExamples).insertOne(this.example)
+        const { insertedId } = await db.collection(this.config.getCollections().trainingExamples).insertOne(this.example)
 
         return { insertedId: insertedId.toHexString() }
 

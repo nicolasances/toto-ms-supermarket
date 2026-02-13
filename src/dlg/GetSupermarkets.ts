@@ -1,15 +1,27 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, TotoRequest, Logger } from "totoms";
+import { ControllerConfig } from "../Config";
 import { SupermarketStore } from "../store/SupermarketStore";
 
-export class GetSupermarkets implements TotoDelegate {
+interface GetSupermarketsRequest extends TotoRequest {
+}
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+interface GetSupermarketsResponse {
+    [key: string]: any;
+}
+
+export class GetSupermarkets extends TotoDelegate<GetSupermarketsRequest, GetSupermarketsResponse> {
+
+    async do(req: GetSupermarketsRequest, userContext?: UserContext): Promise<GetSupermarketsResponse> {
+
+        const logger = Logger.getInstance();
 
         return new SupermarketStore().getSupermarkets()
 
+    }
+
+    parseRequest(req: Request): GetSupermarketsRequest {
+        return {};
     }
 
 }
