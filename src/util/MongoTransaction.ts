@@ -1,36 +1,30 @@
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { ControllerConfig } from "../Config";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
-import { TotoRuntimeError } from "toto-api-controller/dist/model/TotoRuntimeError";
+import { ValidationError } from "totoms";
 import { Db } from "mongodb";
 
 
 export class MongoTransaction<T> {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
 
-    constructor(execContext: ExecutionContext) {
-        this.execContext = execContext;
+    constructor(config: ControllerConfig, cid: string) {
+        this.config = config;
+        this.cid = cid;
     }
 
     async execute(process: Process<T>): Promise<T> {
-
-        const config = this.execContext.config as ControllerConfig
-
-        let client;
-
         try {
 
             // Instantiate the DB
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
+            const db = await this.config.getMongoDb(this.config.getDBName());
 
             // Execute the process
             return await process.do(db);
 
         } catch (error) {
 
-            if (error instanceof ValidationError || error instanceof TotoRuntimeError) {
+            if (error instanceof ValidationError) {
                 throw error;
             }
             else {
@@ -38,9 +32,6 @@ export class MongoTransaction<T> {
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
 
     }

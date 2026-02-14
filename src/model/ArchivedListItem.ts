@@ -1,7 +1,7 @@
 import { Document, WithId } from "mongodb"
 import { Supermarket } from "./Supermarket"
 import { ListItem } from "./ListItem"
-import { ValidationError } from "toto-api-controller/dist/validation/Validator"
+import { ValidationError } from "totoms"
 import { LocationListItem } from "./LocationListItem"
 import { F_DATE, F_LIST_ID, F_NAME, F_SUP_ID, F_SUP_LOCATION, F_SUP_NAME, F_USER_INDEX } from "../store/ArchivedListStore"
 import moment from "moment-timezone"

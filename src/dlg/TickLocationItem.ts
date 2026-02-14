@@ -1,16 +1,24 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
-import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError'
 import { LocationListStore } from "../store/LocationListStore";
 import { DEFAULT_USER_INDEX, LocationListItem } from "../model/LocationListItem";
 import { Supermarket } from "../model/Supermarket";
 import { SupermarketStore } from "../store/SupermarketStore";
 import { countTickedItems, determineUserIndex } from "../util/LocationListUtils";
 import { EventPublisher } from "../evt/EventPublisher";
+
+interface TickLocationItemRequest extends TotoRequest {
+    sid: string;
+    id: string;
+    ticked: boolean;
+}
+
+interface TickLocationItemResponse {
+    ticked: boolean;
+    assignedUserIndex: number;
+    [key: string]: any;
+}
 
 /**
  * Ticking (or unticking) a location item does mainly two things: 
@@ -22,29 +30,25 @@ import { EventPublisher } from "../evt/EventPublisher";
  * It is tracked to provide a training base for the Supermarket ML "Item Index Model". 
  * 
  */
-export class TickLocationItem implements TotoDelegate {
+export class TickLocationItem extends TotoDelegate<TickLocationItemRequest, TickLocationItemResponse> {
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+    async do(req: TickLocationItemRequest, userContext?: UserContext): Promise<TickLocationItemResponse> {
 
-        const config = execContext.config as ControllerConfig
+        const config = this.config as ControllerConfig;
+        const logger = Logger.getInstance();
 
-        const supermarketId = req.params.sid;
-        const itemId = req.params.id;
-        const ticked = req.body.ticked;
-
-        if (ticked == null) throw new ValidationError(400, `No ticked property provided`)
-
-        let client;
+        const supermarketId = req.sid;
+        const itemId = req.id;
+        const ticked = req.ticked;
 
         try {
 
             // Instantiate the DB
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
+            const db = await config.getMongoDb(config.getDBName());
 
             // Create the stores
             const supermarketStore = new SupermarketStore();
-            const store = new LocationListStore(db, execContext);
+            const store = new LocationListStore(db, this.cid!, config);
 
             // Retrieve the supermarket
             const supermarket = await supermarketStore.getSupermarket(supermarketId);
@@ -62,26 +66,34 @@ export class TickLocationItem implements TotoDelegate {
             // If all the items of the list have NOW been ticked, publish an event
             if (ticked === true && countTickedItems(items) == items.length - 1) {
 
-                await new EventPublisher(execContext, 'supermarket').publishEvent(supermarketId, `location-list-closed`, `A Location List has been closed.`)
+                await new EventPublisher(config, this.cid!, 'supermarket').publishEvent(supermarketId, `location-list-closed`, `A Location List has been closed.`)
             }
 
             return { ...updateResult, ticked: ticked, assignedUserIndex: assignedUserIndex };
 
         } catch (error) {
 
-            if (error instanceof ValidationError || error instanceof TotoRuntimeError) {
+            if (error instanceof ValidationError) {
                 throw error;
             }
             else {
-                console.log(error);
+                logger.compute(this.cid, `Error ticking location item: ${error}`);
                 throw error;
             }
 
         }
-        finally {
-            if (client) client.close();
-        }
 
+    }
+
+    parseRequest(req: Request): TickLocationItemRequest {
+        const ticked = req.body.ticked;
+        if (ticked == null) throw new ValidationError(400, `No ticked property provided`)
+
+        return {
+            sid: req.params.sid,
+            id: req.params.id,
+            ticked: ticked
+        };
     }
 
 }

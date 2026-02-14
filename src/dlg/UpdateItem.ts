@@ -1,55 +1,59 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
 import { ListStore } from "../store/ListStore";
 import { ListItem } from "../model/ListItem";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
-import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError'
 
-export class UpdateItem implements TotoDelegate {
+interface UpdateItemRequest extends TotoRequest {
+    id: string;
+    item: ListItem;
+}
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+interface UpdateItemResponse {
+    updated: boolean;
+}
 
-        const config = execContext.config as ControllerConfig
+export class UpdateItem extends TotoDelegate<UpdateItemRequest, UpdateItemResponse> {
 
-        const itemId = req.params.id;
+    async do(req: UpdateItemRequest, userContext?: UserContext): Promise<UpdateItemResponse> {
 
-        let client;
+        const config = this.config as ControllerConfig;
+        const logger = Logger.getInstance();
+
+        const itemId = req.id;
 
         try {
 
             // Instantiate the DB
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
+            const db = await config.getMongoDb(config.getDBName());
 
             // Create the store
-            const store = new ListStore(db, execContext);
-
-            // Create the item
-            const item = ListItem.fromTransferObject(req.body);
+            const store = new ListStore(db, this.cid!, config);
 
             // Save the item
-            await store.updateItem(itemId, item);
+            await store.updateItem(itemId, req.item);
 
             return { updated: true }
 
         } catch (error) {
 
-            if (error instanceof ValidationError || error instanceof TotoRuntimeError) {
+            if (error instanceof ValidationError) {
                 throw error;
             }
             else {
-                console.log(error);
+                logger.compute(this.cid, `Error updating item: ${error}`);
                 throw error;
             }
 
         }
-        finally {
-            if (client) client.close();
-        }
 
+    }
+
+    parseRequest(req: Request): UpdateItemRequest {
+        return {
+            id: req.params.id,
+            item: ListItem.fromTransferObject(req.body)
+        };
     }
 
 }

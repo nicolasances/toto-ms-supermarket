@@ -1,4 +1,4 @@
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
+import { ControllerConfig } from "../Config";
 import { SupermarketStore } from "../store/SupermarketStore";
 import { LocationListStore } from "../store/LocationListStore";
 import { v4 as uuidv4 } from 'uuid'
@@ -6,32 +6,34 @@ import { ArchivedListItem } from "../model/ArchivedListItem";
 import { Process } from "../util/MongoTransaction";
 import { Db } from "mongodb";
 import { ArchivedListStore } from "../store/ArchivedListStore";
+import { Logger } from "totoms";
 
 
 export class ArchiveLocationListProcess extends Process<{ done: boolean }> {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
     supermarketId: string;
 
-    constructor(execContext: ExecutionContext, supermarketId: string) {
+    constructor(config: ControllerConfig, cid: string, supermarketId: string) {
         super();
-        this.execContext = execContext;
+        this.config = config;
+        this.cid = cid;
         this.supermarketId = supermarketId;
     }
 
     async do(db: Db): Promise<{ done: boolean }> {
 
-        const logger = this.execContext.logger;
-        const cid = this.execContext.cid;
+        const logger = Logger.getInstance();
 
         // Instantiate stores
         const supermarketStore = new SupermarketStore()
-        const locationListStore = new LocationListStore(db, this.execContext);
+        const locationListStore = new LocationListStore(db, this.cid, this.config);
 
         // Get the supermarket
         const supermarket = await supermarketStore.getSupermarket(this.supermarketId);
 
-        logger.compute(cid, `Archiving the Location List of supermarket [${JSON.stringify(supermarket)}]`)
+        logger.compute(this.cid, `Archiving the Location List of supermarket [${JSON.stringify(supermarket)}]`)
 
         // Find all the items in the Location List
         const items = await locationListStore.getLocationListItems(supermarket);
@@ -49,10 +51,10 @@ export class ArchiveLocationListProcess extends Process<{ done: boolean }> {
         }
 
         // Save the list
-        if (itemsToArchive.length > 0) await new ArchivedListStore(db, this.execContext).insertItems(itemsToArchive);
+        if (itemsToArchive.length > 0) await new ArchivedListStore(db, this.cid, this.config).insertItems(itemsToArchive);
 
         // Done
-        logger.compute(cid, `Archived [${itemsToArchive.length}] items with listId [${listId}]`)
+        logger.compute(this.cid, `Archived [${itemsToArchive.length}] items with listId [${listId}]`)
 
         return { done: true }
 

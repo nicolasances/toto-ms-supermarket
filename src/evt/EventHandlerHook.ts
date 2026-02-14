@@ -1,31 +1,41 @@
 import { Request } from "express";
 import { TotoEvent } from "./TotoEvent";
 import { AEventHandler } from "./EventHanlder";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
+import { TotoDelegate, UserContext, TotoRequest, Logger } from "totoms";
+import { ControllerConfig } from "../Config";
 import { OnItemAdded } from "./handlers/OnItemAdded";
 import { OnLocationListClosed } from "./handlers/OnLocationListClosed";
 import { OnItemDeleted } from "./handlers/OnItemDeleted";
 
-export class EventHandlerHook implements TotoDelegate {
+interface EventHandlerRequest extends TotoRequest {
+    message: {
+        data: string;
+    };
+}
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+interface EventHandlerResponse {
+    processed: boolean;
+}
 
-        const logger = execContext.logger;
-        const cid = execContext.cid;
+export class EventHandlerHook extends TotoDelegate<EventHandlerRequest, EventHandlerResponse> {
+
+    async do(req: EventHandlerRequest, userContext?: UserContext): Promise<EventHandlerResponse> {
+
+        const logger = Logger.getInstance();
+        const cid = this.cid;
+        const config = this.config as ControllerConfig;
 
         logger.compute(cid, `Received message from PubSub`);
 
         const HANDLERS: IIndexable = {
 
-            [HandledEvents.itemAdded]: [new OnItemAdded(execContext)],
-            [HandledEvents.itemDeleted]: [new OnItemDeleted(execContext)],
-            [HandledEvents.locationListClosed]: [new OnLocationListClosed(execContext)],
+            [HandledEvents.itemAdded]: [new OnItemAdded(config, cid!)],
+            [HandledEvents.itemDeleted]: [new OnItemDeleted(config, cid!)],
+            [HandledEvents.locationListClosed]: [new OnLocationListClosed(config, cid!)],
 
         }
 
-        const totoEvent = JSON.parse(String(Buffer.from(req.body.message.data, 'base64'))) as TotoEvent;
+        const totoEvent = JSON.parse(String(Buffer.from(req.message.data, 'base64'))) as TotoEvent;
 
         // Find the right event handler 
         if (HANDLERS[totoEvent.type]) {
@@ -40,6 +50,12 @@ export class EventHandlerHook implements TotoDelegate {
 
         return { processed: true }
 
+    }
+
+    parseRequest(req: Request): EventHandlerRequest {
+        return {
+            message: req.body.message
+        };
     }
 
 }

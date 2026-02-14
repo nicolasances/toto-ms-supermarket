@@ -1,7 +1,7 @@
 import { PubSub, Topic } from "@google-cloud/pubsub";
 import moment from "moment-timezone";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { ControllerConfig } from "../Config";
+import { Logger } from "totoms";
 
 const pubsub = new PubSub({ projectId: process.env.GCP_PID });
 
@@ -12,18 +12,16 @@ const topics = new Array<TopicWrapper>()
  */
 export class EventPublisher {
 
-    execContext: ExecutionContext;
     cid: string;
     config: ControllerConfig;
     topic: TopicWrapper | null;
 
-    constructor(execContext: ExecutionContext, topicName: TopicName) {
+    constructor(config: ControllerConfig, cid: string, topicName: TopicName) {
 
-        this.execContext = execContext;
-        this.cid = String(execContext.cid);
-        this.config = this.execContext.config as ControllerConfig
+        this.cid = cid;
+        this.config = config;
 
-        const logger = execContext.logger;
+        const logger = Logger.getInstance();
 
         this.topic = findTopicInCache(topicName);
 
@@ -48,7 +46,7 @@ export class EventPublisher {
      */
     publishEvent = async (id: string, eventType: EventType, msg: string, data?: any): Promise<PublishingResult> => {
 
-        const logger = this.execContext.logger;
+        const logger = Logger.getInstance();
 
         let timestamp = moment().tz('Europe/Rome').format('YYYY.MM.DD HH:mm:ss');
 

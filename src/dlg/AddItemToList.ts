@@ -1,30 +1,47 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
+import { ControllerConfig } from "../Config";
 import { ListItem } from "../model/ListItem";
 import { AddItemToListProcess } from "../process/AddItemToListProcess";
 import { MongoTransaction } from "../util/MongoTransaction";
 import { extractTokenFromHeader } from "../util/TokenExtract";
 
-export class AddItemToList implements TotoDelegate {
+interface AddItemToListRequest extends TotoRequest {
+    item: ListItem;
+    token: string;
+}
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+interface AddItemToListResponse {
+    id: string;
+}
 
-        // Create the item
-        const item = ListItem.fromTransferObject(req.body);
+export class AddItemToList extends TotoDelegate<AddItemToListRequest, AddItemToListResponse> {
 
-        execContext.logger.compute(execContext.cid, `Adding item to the supermarket list: ${item}`)
+    async do(req: AddItemToListRequest, userContext?: UserContext): Promise<AddItemToListResponse> {
+
+        const config = this.config as ControllerConfig;
+        const logger = Logger.getInstance();
+
+        const item = req.item;
+
+        logger.compute(this.cid!, `Adding item to the supermarket list: ${item}`)
 
         // Create the process to execute
-        const addItemProcess = new AddItemToListProcess(extractTokenFromHeader(req.headers)!, execContext, item);
+        const addItemProcess = new AddItemToListProcess(req.token, config, this.cid!, item);
 
         // Execute the process
-        const { id } = await new MongoTransaction<{ id: string }>(execContext).execute(addItemProcess);
+        const { id } = await new MongoTransaction<{ id: string }>(config, this.cid!).execute(addItemProcess);
 
         // Return the item id
         return { id: id }
 
+    }
+
+    parseRequest(req: Request): AddItemToListRequest {
+        return {
+            item: ListItem.fromTransferObject(req.body),
+            token: extractTokenFromHeader(req.headers)!
+        };
     }
 
 }

@@ -1,13 +1,12 @@
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
 import { ListItem } from "../model/ListItem";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
-import { TotoRuntimeError } from "toto-api-controller/dist/model/TotoRuntimeError";
+import { ValidationError, TotoRuntimeError } from "totoms";
 import { ControllerConfig } from "../Config";
 import { SupermarketStore } from "../store/SupermarketStore";
 import { MongoClient } from "mongodb";
 import { LocationListStore } from "../store/LocationListStore";
 import { LocationListItem } from "../model/LocationListItem";
 import { SupermarketMLModel } from "../api/SupermarketMLModel";
+import { Logger } from "totoms";
 
 /**
  * This process takes a new item that has been added to the "main" list and adds it to the Location Lists, 
@@ -23,32 +22,29 @@ import { SupermarketMLModel } from "../api/SupermarketMLModel";
  */
 export class AddItemAndSortProcess {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
     token: string;
 
-    constructor(token: string, execContext: ExecutionContext) {
-        this.execContext = execContext;
+    constructor(token: string, config: ControllerConfig, cid: string) {
+        this.config = config;
+        this.cid = cid;
         this.token = token
     }
 
     async do(item: ListItem) {
 
-        const config = this.execContext.config as ControllerConfig
-        const logger = this.execContext.logger;
-        const cid = this.execContext.cid;
+        const logger = Logger.getInstance();
 
-        let client;
-
-        logger.compute(cid, `Adding list item [${JSON.stringify(item)}] to Location Lists and re-sorting.`)
+        logger.compute(this.cid, `Adding list item [${JSON.stringify(item)}] to Location Lists and re-sorting.`)
 
         try {
 
             // Instantiate the DB
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
+            const db = await this.config.getMongoDb(this.config.getDBName());
 
-            const locationListStore = new LocationListStore(db, this.execContext);
-            const supermarketMLModel = new SupermarketMLModel(this.token, this.execContext);
+            const locationListStore = new LocationListStore(db, this.cid, this.config);
+            const supermarketMLModel = new SupermarketMLModel(this.token, this.config, this.cid);
 
             // 1. Get all the supermarkets (locations)
             const { supermarkets } = new SupermarketStore().getSupermarkets()
@@ -56,7 +52,7 @@ export class AddItemAndSortProcess {
             // 2. For each Location List, add & sort
             for (const supermarket of supermarkets) {
 
-                logger.compute(cid, `Adding item to supermarket [${JSON.stringify(supermarket)}]`)
+                logger.compute(this.cid, `Adding item to supermarket [${JSON.stringify(supermarket)}]`)
 
                 // 2.1. Get the currenct Location List
                 const llitems = await locationListStore.getLocationListItems(supermarket);
@@ -64,7 +60,7 @@ export class AddItemAndSortProcess {
                 // 2.2. If the list is empty, there's no sorting to do: just add the item and continue to the next list
                 if (llitems.length == 0) {
 
-                    logger.compute(cid, `Item is the first of the Location List for supermarket [${supermarket.name}]`)
+                    logger.compute(this.cid, `Item is the first of the Location List for supermarket [${supermarket.name}]`)
 
                     await locationListStore.addLocationListItem(LocationListItem.fromListItem(item, supermarket));
 
@@ -76,7 +72,7 @@ export class AddItemAndSortProcess {
                     // TODO: this will return a sorted list that just needs to be saved
                     const predictedIndex = await supermarketMLModel.predictItemPosition(item, llitems)
 
-                    logger.compute(cid, `Item is positionned at predicted index [${predictedIndex}]`)
+                    logger.compute(this.cid, `Item is positionned at predicted index [${predictedIndex}]`)
 
                     // Add & Save
                     await locationListStore.addLocationListItem(LocationListItem.fromListItem(item, supermarket, predictedIndex))
@@ -96,9 +92,6 @@ export class AddItemAndSortProcess {
                 throw error;
             }
 
-        }
-        finally {
-            if (client) client.close();
         }
     }
 

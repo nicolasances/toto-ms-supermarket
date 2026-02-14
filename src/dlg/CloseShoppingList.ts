@@ -1,12 +1,8 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
 import { ListStore } from "../store/ListStore";
 import { ListItem } from "../model/ListItem";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
-import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError'
 import { EventPublisher } from "../evt/EventPublisher";
 import { LocationListStore } from "../store/LocationListStore";
 import { SupermarketStore } from "../store/SupermarketStore";
@@ -19,6 +15,15 @@ import { MongoTransaction, Process } from "../util/MongoTransaction";
 import { Db } from "mongodb";
 import { LocationListItem } from "../model/LocationListItem";
 import { extractTokenFromHeader } from "../util/TokenExtract";
+
+interface CloseShoppingListRequest extends TotoRequest {
+    sid: string;
+    token: string;
+}
+
+interface CloseShoppingListResponse {
+    untickedItems: LocationListItem[];
+}
 
 /**
  * Closing the shopping list is typically used when there are still items in the location list. 
@@ -37,31 +42,42 @@ import { extractTokenFromHeader } from "../util/TokenExtract";
  * 3. The unticked elements are passed to the "location-list-closed" event, to signal that they should be "re-added" to the main list
  * 
  */
-export class CloseShoppingList implements TotoDelegate {
+export class CloseShoppingList extends TotoDelegate<CloseShoppingListRequest, CloseShoppingListResponse> {
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+    async do(req: CloseShoppingListRequest, userContext?: UserContext): Promise<CloseShoppingListResponse> {
 
-        const supermarketId = req.params.sid;
+        const config = this.config as ControllerConfig;
 
-        const result = new MongoTransaction<LocationListItem[]>(execContext).execute(
-            new CloseShoppingListProcess(extractTokenFromHeader(req.headers)!, execContext, supermarketId)
+        const supermarketId = req.sid;
+
+        const result = await new MongoTransaction<LocationListItem[]>(config, this.cid!).execute(
+            new CloseShoppingListProcess(req.token, config, this.cid!, supermarketId)
         );
 
         return { untickedItems: result }
 
     }
 
+    parseRequest(req: Request): CloseShoppingListRequest {
+        return {
+            sid: req.params.sid,
+            token: extractTokenFromHeader(req.headers)!
+        };
+    }
+
 }
 
 class CloseShoppingListProcess extends Process<LocationListItem[]> {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
     supermarketId: string;
     authToken: string;
 
-    constructor(authToken: string, execContext: ExecutionContext, supermarketId: string) {
+    constructor(authToken: string, config: ControllerConfig, cid: string, supermarketId: string) {
         super();
-        this.execContext = execContext;
+        this.config = config;
+        this.cid = cid;
         this.supermarketId = supermarketId;
         this.authToken = authToken;
     }
@@ -70,7 +86,7 @@ class CloseShoppingListProcess extends Process<LocationListItem[]> {
 
         // Stores
         const supermarketStore = new SupermarketStore();
-        const llstore = new LocationListStore(db, this.execContext);
+        const llstore = new LocationListStore(db, this.cid, this.config);
 
         // Get the supermarket
         const supermarket = await supermarketStore.getSupermarket(this.supermarketId);
@@ -82,7 +98,7 @@ class CloseShoppingListProcess extends Process<LocationListItem[]> {
         await llstore.deleteUntickedItems();
 
         // 3. Shopping List is closed: 
-        await new EventPublisher(this.execContext, 'supermarket').publishEvent(this.supermarketId, `location-list-closed`, `A Location List has been closed.`, { untickedItems: untickedItems, authToken: this.authToken })
+        await new EventPublisher(this.config, this.cid, 'supermarket').publishEvent(this.supermarketId, `location-list-closed`, `A Location List has been closed.`, { untickedItems: untickedItems, authToken: this.authToken })
 
         return untickedItems;
 

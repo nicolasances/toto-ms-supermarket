@@ -1,0 +1,362 @@
+openapi: 3.1.0
+info:
+  title: Toto Supermarket API
+  version: 1.0.0
+  description: |
+    OpenAPI specification for the `toto-ms-supermarket` microservice.
+
+servers:
+  - url: https://toto-ms-supermarket-{environment}-ew.a.run.app
+    description: Endpoint
+    variables:
+      environment:
+        default: dev
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ListItem:
+      type: object
+      description: Item in the Main List.
+      additionalProperties: true
+    LocationListItem:
+      type: object
+      description: Item in a Location List (shopping session).
+      additionalProperties: true
+    Supermarket:
+      type: object
+      description: Supermarket location.
+      additionalProperties: true
+    TrainingExample:
+      type: object
+      description: Training example for sorting games.
+      additionalProperties: true
+    PubSubEnvelope:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: object
+          required: [data]
+          properties:
+            data:
+              type: string
+              description: Base64-encoded JSON Toto event payload.
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+
+paths:
+  /list/items:
+    get:
+      summary: Get Main List items
+      tags: [Main List]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ListItem"
+    post:
+      summary: Add an item to the Main List
+      tags: [Main List]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListItem"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /list/items/{id}:
+    put:
+      summary: Update an item in the Main List
+      tags: [Main List]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListItem"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: boolean
+    delete:
+      summary: Delete an item from the Main List
+      tags: [Main List]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+
+  /supermarkets:
+    get:
+      summary: List configured supermarkets
+      tags: [Supermarkets]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  supermarkets:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Supermarket"
+
+  /supermarkets/{id}/items:
+    get:
+      summary: Get Location List items for a supermarket
+      tags: [Location Lists]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LocationListItem"
+
+  /supermarkets/{sid}/items/{id}/tick:
+    put:
+      summary: Tick or untick an item in a Location List
+      tags: [Location Lists]
+      parameters:
+        - name: sid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticked]
+              properties:
+                ticked:
+                  type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticked:
+                    type: boolean
+                  assignedUserIndex:
+                    type: integer
+
+  /supermarkets/{sid}/close:
+    post:
+      summary: Close a Location List early
+      tags: [Location Lists]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  untickedItems:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LocationListItem"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /names:
+    get:
+      summary: Get common item names
+      tags: [Names]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  names:
+                    type: array
+                    items:
+                      type: string
+
+  /predictions/nesu:
+    get:
+      summary: Predict next groceries day offset
+      tags: [Predictions]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictedDays:
+                    type: integer
+
+  /games/sort/examples:
+    post:
+      summary: Save a training example
+      tags: [Games]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainingExample"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+
+  /games/sort/next:
+    get:
+      summary: Get next training round
+      tags: [Games]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      item1:
+                        type: string
+                      item2:
+                        type: string
+                  - type: object
+                    additionalProperties: false
+
+  /backup:
+    post:
+      summary: Trigger a database backup
+      tags: [Operations]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  backup:
+                    type: string
+
+  /events:
+    post:
+      summary: Pub/Sub event hook
+      tags: [Events]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PubSubEnvelope"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed:
+                    type: boolean

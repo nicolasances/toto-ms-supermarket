@@ -2,37 +2,37 @@ import fs from 'fs'
 import moment from 'moment-timezone';
 import { Request } from "express";
 import { Storage } from "@google-cloud/storage";
-import { TotoDelegate } from 'toto-api-controller/dist/model/TotoDelegate';
-import { UserContext } from 'toto-api-controller/dist/model/UserContext';
-import { ExecutionContext } from 'toto-api-controller/dist/model/ExecutionContext';
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from 'totoms';
 import { ControllerConfig } from '../../Config';
 import { correlationId } from '../../util/CorrelationId';
-import { ValidationError } from 'toto-api-controller/dist/validation/Validator';
-import { TotoRuntimeError } from 'toto-api-controller/dist/model/TotoRuntimeError';
 
 const storage = new Storage();
 
-export class StartBackup implements TotoDelegate {
+interface StartBackupRequest extends TotoRequest {
+}
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<any> {
+interface StartBackupResponse {
+    backup: string;
+}
 
-        const logger = execContext.logger;
-        const cid = execContext.cid ?? correlationId();
+export class StartBackup extends TotoDelegate<StartBackupRequest, StartBackupResponse> {
+
+    async do(req: StartBackupRequest, userContext?: UserContext): Promise<StartBackupResponse> {
+
+        const logger = Logger.getInstance();
+        const cid = this.cid ?? correlationId();
         const bucketName = String(process.env.BACKUP_BUCKET);
 
         const today = moment()
         const twoDaysAgo = moment().add(-2, "days");
 
-        let client;
-
         try {
 
             logger.compute(cid, `Starting Database Backup`)
 
-            const config = execContext.config as ControllerConfig;
+            const config = this.config as ControllerConfig;
 
-            client = await config.getMongoClient();
-            const db = client.db(config.getDBName());
+            const db = await config.getMongoDb(config.getDBName());
 
             // Iterate through the relevant collections
             for (let collection of Object.keys(config.getCollections())) {
@@ -83,7 +83,7 @@ export class StartBackup implements TotoDelegate {
 
             logger.compute(cid, `${error}`, "error")
 
-            if (error instanceof ValidationError || error instanceof TotoRuntimeError) {
+            if (error instanceof ValidationError) {
                 throw error;
             }
             else {
@@ -92,9 +92,10 @@ export class StartBackup implements TotoDelegate {
             }
 
         }
-        finally {
-            if (client) client.close();
-        }
+    }
+
+    parseRequest(req: Request): StartBackupRequest {
+        return {};
     }
 
 }

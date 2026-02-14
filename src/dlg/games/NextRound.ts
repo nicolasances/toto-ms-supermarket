@@ -1,13 +1,20 @@
 import { Request } from "express";
-import { ExecutionContext } from "toto-api-controller/dist/model/ExecutionContext";
-import { TotoDelegate } from "toto-api-controller/dist/model/TotoDelegate";
-import { UserContext } from "toto-api-controller/dist/model/UserContext";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { MongoTransaction, Process } from "../../util/MongoTransaction";
 import { Db } from "mongodb";
 import { ControllerConfig } from "../../Config";
 import { TrainingExample } from "../../model/games/TrainingExample";
 import { ArchivedListStore } from "../../store/ArchivedListStore";
-import { ValidationError } from "toto-api-controller/dist/validation/Validator";
+
+interface NextRoundRequest extends TotoRequest {
+}
+
+interface RoundData {
+    item1: string,
+    item2: string,
+}
+
+type NextRoundResponse = RoundData | Record<string, never>;
 
 /**
  * Moves to the next round
@@ -16,12 +23,14 @@ import { ValidationError } from "toto-api-controller/dist/validation/Validator";
  * The two items are taken randomly from the list of archived items
  * 
  */
-export class NextRound implements TotoDelegate {
+export class NextRound extends TotoDelegate<NextRoundRequest, NextRoundResponse> {
 
-    async do(req: Request, userContext: UserContext, execContext: ExecutionContext): Promise<RoundData | {}> {
+    async do(req: NextRoundRequest, userContext?: UserContext): Promise<NextRoundResponse> {
 
-        const result = await new MongoTransaction<RoundData | null>(execContext).execute(
-            new NextRoundProcess(execContext)
+        const config = this.config as ControllerConfig;
+
+        const result = await new MongoTransaction<RoundData | null>(config, this.cid!).execute(
+            new NextRoundProcess(config, this.cid!)
         );
 
         if (!result) return {}
@@ -30,24 +39,33 @@ export class NextRound implements TotoDelegate {
 
     }
 
+    parseRequest(req: Request): NextRoundRequest {
+        return {};
+    }
+
 }
 
-class NextRoundProcess implements Process<RoundData | null> {
+class NextRoundProcess extends Process<RoundData | null> {
 
-    execContext: ExecutionContext;
+    config: ControllerConfig;
+    cid: string;
 
-    constructor(execContext: ExecutionContext) {
-        this.execContext = execContext;
+    constructor(config: ControllerConfig, cid: string) {
+        super();
+        this.config = config;
+        this.cid = cid;
     }
 
     async do(db: Db): Promise<RoundData | null> {
 
+        const logger = Logger.getInstance();
+
         // Sample 2 random items from the archived lists
-        const items = await new ArchivedListStore(db, this.execContext).sampleRandomItems(2)
+        const items = await new ArchivedListStore(db, this.cid, this.config).sampleRandomItems(2)
 
         // Check that there were two samples
         if (items.length != 2) {
-            this.execContext.logger.compute(this.execContext.cid, `Extraction of 2 samples from archivedLists collections failed. Extracted [${items.length}] items.`, "error");
+            logger.compute(this.cid, `Extraction of 2 samples from archivedLists collections failed. Extracted [${items.length}] items.`, "error");
             return null;
         }
 
@@ -55,9 +73,4 @@ class NextRoundProcess implements Process<RoundData | null> {
         return { item1: items[0].name, item2: items[1].name };
     }
 
-}
-
-interface RoundData {
-    item1: string,
-    item2: string,
 }
