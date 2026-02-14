@@ -23,26 +23,27 @@ const config: TotoMicroserviceConfiguration = {
     },
     customConfiguration: ControllerConfig,
     apiConfiguration: {
+        openAPISpecification: { localSpecsFilePath: "./openapi.yaml" },
         apiEndpoints: [
             { method: 'GET', path: '/list/items', delegate: GetItems },
             { method: 'POST', path: '/list/items', delegate: AddItemToList },
             { method: 'PUT', path: '/list/items/:id', delegate: UpdateItem },
             { method: 'DELETE', path: '/list/items/:id', delegate: DeleteItem },
-            
+
             { method: 'GET', path: '/supermarkets', delegate: GetSupermarkets },
             { method: 'GET', path: '/supermarkets/:id/items', delegate: GetLocationList },
             { method: 'PUT', path: '/supermarkets/:sid/items/:id/tick', delegate: TickLocationItem },
             { method: 'POST', path: '/supermarkets/:sid/close', delegate: CloseShoppingList },
-            
+
             { method: 'GET', path: '/names', delegate: GetNames },
-            
+
             { method: 'GET', path: '/predictions/nesu', delegate: GetNextPredictedGroceriesDay },
-            
+
             { method: 'POST', path: '/games/sort/examples', delegate: SaveExample },
             { method: 'GET', path: '/games/sort/next', delegate: NextRound },
-            
+
             { method: 'POST', path: '/backup', delegate: StartBackup },
-            
+
             { method: 'POST', path: '/events', delegate: EventHandlerHook }
         ]
     }
