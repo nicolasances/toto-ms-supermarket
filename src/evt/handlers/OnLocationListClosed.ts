@@ -4,9 +4,10 @@ import { DeleteMainSupermarketListProcess } from "../../process/DeleteMainSuperm
 import { AddItemToListProcess } from "../../process/AddItemToListProcess";
 import { MongoTransaction, Process } from "../../util/MongoTransaction";
 import { Db } from "mongodb";
-import { Logger, ProcessingResponse, TotoMessage, TotoMessageHandler } from "totoms";
+import { Logger, MessageDestination, ProcessingResponse, TotoMessage, TotoMessageBus, TotoMessageHandler } from "totoms";
 import { LocationListItem } from "../../model/LocationListItem";
 import { ControllerConfig } from "../../Config";
+import moment from "moment-timezone";
 
 export class OnLocationListClosed extends TotoMessageHandler {
 
@@ -26,7 +27,7 @@ export class OnLocationListClosed extends TotoMessageHandler {
         logger.compute(cid, `Event [${msg.type}] received. Supermarket [${supermarketId}] Location List has been closed. Unticked items: [${JSON.stringify(untickedItems ?? {})}]`)
 
         // Instantiate the process
-        const process = new OnLocationListClosedProcess(authToken, config, cid, supermarketId, untickedItems)
+        const process = new OnLocationListClosedProcess(authToken, config, cid, supermarketId, untickedItems, this.messageBus);
 
         // Run the process
         const result = await new MongoTransaction<ProcessingResponse>(config, cid).execute(process);
@@ -44,14 +45,16 @@ class OnLocationListClosedProcess extends Process<ProcessingResponse> {
     supermarketId: string;
     untickedItems: LocationListItem[] | undefined;
     authToken: string;
+    messageBus: TotoMessageBus;
 
-    constructor(authToken: string, config: ControllerConfig, cid: string, supermarketId: string, untickedItems?: LocationListItem[]) {
+    constructor(authToken: string, config: ControllerConfig, cid: string, supermarketId: string, untickedItems?: LocationListItem[], messageBus?: TotoMessageBus) {
         super();
         this.config = config;
         this.cid = cid;
         this.supermarketId = supermarketId;
         this.untickedItems = untickedItems;
         this.authToken = authToken;
+        this.messageBus = messageBus!;
     }
 
     async do(db: Db): Promise<ProcessingResponse> {
@@ -70,7 +73,25 @@ class OnLocationListClosedProcess extends Process<ProcessingResponse> {
 
             for (const untickedItem of this.untickedItems) {
 
-                await new AddItemToListProcess(this.authToken, this.config, this.cid, untickedItem).do(db)
+                await new AddItemToListProcess(
+                    this.authToken,
+                    this.config,
+                    this.cid,
+                    untickedItem,
+                    async (itemId, itemToPublish, authToken) => {
+                        const timestamp = moment().tz('Europe/Rome').format('YYYY.MM.DD HH:mm:ss');
+                        const message: TotoMessage = {
+                            timestamp: timestamp,
+                            cid: this.cid,
+                            id: itemId,
+                            type: "itemAdded",
+                            msg: `Item [${itemToPublish.id}] added to the Supermarket List`,
+                            data: { item: itemToPublish, authToken: authToken }
+                        };
+
+                        await this.messageBus.publishMessage(new MessageDestination({ topic: "supermarket" }), message)
+                    }
+                ).do(db)
             }
         }
 

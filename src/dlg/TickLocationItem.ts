@@ -1,12 +1,12 @@
 import { Request } from "express";
-import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
+import { MessageDestination, TotoDelegate, TotoMessage, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
 import { LocationListStore } from "../store/LocationListStore";
 import { DEFAULT_USER_INDEX, LocationListItem } from "../model/LocationListItem";
 import { Supermarket } from "../model/Supermarket";
 import { SupermarketStore } from "../store/SupermarketStore";
 import { countTickedItems, determineUserIndex } from "../util/LocationListUtils";
-import { EventPublisher } from "../evt/EventPublisher";
+import moment from "moment-timezone";
 
 interface TickLocationItemRequest extends TotoRequest {
     sid: string;
@@ -66,7 +66,17 @@ export class TickLocationItem extends TotoDelegate<TickLocationItemRequest, Tick
             // If all the items of the list have NOW been ticked, publish an event
             if (ticked === true && countTickedItems(items) == items.length - 1) {
 
-                await new EventPublisher(config, this.cid!, 'supermarket').publishEvent(supermarketId, `location-list-closed`, `A Location List has been closed.`)
+                const timestamp = moment().tz('Europe/Rome').format('YYYY.MM.DD HH:mm:ss');
+                const message: TotoMessage = {
+                    timestamp: timestamp,
+                    cid: this.cid!,
+                    id: supermarketId,
+                    type: "locationListClosed",
+                    msg: "A Location List has been closed.",
+                    data: undefined
+                };
+
+                await this.messageBus.publishMessage(new MessageDestination({ topic: "supermarket" }), message)
             }
 
             return { ...updateResult, ticked: ticked, assignedUserIndex: assignedUserIndex };

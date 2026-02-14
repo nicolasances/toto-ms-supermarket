@@ -1,16 +1,9 @@
 import { Request } from "express";
-import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
+import { MessageDestination, TotoDelegate, TotoMessage, TotoMessageBus, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
-import { ListStore } from "../store/ListStore";
-import { ListItem } from "../model/ListItem";
-import { EventPublisher } from "../evt/EventPublisher";
+import moment from "moment-timezone";
 import { LocationListStore } from "../store/LocationListStore";
 import { SupermarketStore } from "../store/SupermarketStore";
-import { ArchiveLocationListProcess } from "../process/ArchiveLocationListProcess";
-import { DeleteAllLocationListsProcess } from "../process/DeleteAllLocationListsProcess";
-import { DeleteMainSupermarketListProcess } from "../process/DeleteMainSupermarketListProcess";
-import { AddItemToList } from "./AddItemToList";
-import { AddItemToListProcess } from "../process/AddItemToListProcess";
 import { MongoTransaction, Process } from "../util/MongoTransaction";
 import { Db } from "mongodb";
 import { LocationListItem } from "../model/LocationListItem";
@@ -39,7 +32,7 @@ interface CloseShoppingListResponse {
  * 
  * 2. Publish the event "Location List closed", that will take care of following the standard process for closing a list
  * 
- * 3. The unticked elements are passed to the "location-list-closed" event, to signal that they should be "re-added" to the main list
+ * 3. The unticked elements are passed to the "locationListClosed" event, to signal that they should be "re-added" to the main list
  * 
  */
 export class CloseShoppingList extends TotoDelegate<CloseShoppingListRequest, CloseShoppingListResponse> {
@@ -51,7 +44,7 @@ export class CloseShoppingList extends TotoDelegate<CloseShoppingListRequest, Cl
         const supermarketId = req.sid;
 
         const result = await new MongoTransaction<LocationListItem[]>(config, this.cid!).execute(
-            new CloseShoppingListProcess(req.token, config, this.cid!, supermarketId)
+            new CloseShoppingListProcess(req.token, config, this.cid!, supermarketId, this.messageBus)
         );
 
         return { untickedItems: result }
@@ -73,13 +66,15 @@ class CloseShoppingListProcess extends Process<LocationListItem[]> {
     cid: string;
     supermarketId: string;
     authToken: string;
+    messageBus: TotoMessageBus;
 
-    constructor(authToken: string, config: ControllerConfig, cid: string, supermarketId: string) {
+    constructor(authToken: string, config: ControllerConfig, cid: string, supermarketId: string, messageBus: TotoMessageBus) {
         super();
         this.config = config;
         this.cid = cid;
         this.supermarketId = supermarketId;
         this.authToken = authToken;
+        this.messageBus = messageBus;
     }
 
     async do(db: Db): Promise<LocationListItem[]> {
@@ -98,7 +93,17 @@ class CloseShoppingListProcess extends Process<LocationListItem[]> {
         await llstore.deleteUntickedItems();
 
         // 3. Shopping List is closed: 
-        await new EventPublisher(this.config, this.cid, 'supermarket').publishEvent(this.supermarketId, `location-list-closed`, `A Location List has been closed.`, { untickedItems: untickedItems, authToken: this.authToken })
+        const timestamp = moment().tz('Europe/Rome').format('YYYY.MM.DD HH:mm:ss');
+        const message: TotoMessage = {
+            timestamp: timestamp,
+            cid: this.cid,
+            id: this.supermarketId,
+            type: "locationListClosed",
+            msg: "A Location List has been closed.",
+            data: { untickedItems: untickedItems, authToken: this.authToken }
+        };
+
+        await this.messageBus.publishMessage(new MessageDestination({ topic: "supermarket" }), message)
 
         return untickedItems;
 

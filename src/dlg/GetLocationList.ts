@@ -1,9 +1,6 @@
 import { Request } from "express";
 import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
-import { ListStore } from "../store/ListStore";
-import { ListItem } from "../model/ListItem";
-import { EventPublisher } from "../evt/EventPublisher";
 import { SupermarketStore } from "../store/SupermarketStore";
 import { LocationListStore } from "../store/LocationListStore";
 

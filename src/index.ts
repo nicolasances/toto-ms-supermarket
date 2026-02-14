@@ -4,7 +4,6 @@ import { AddItemToList } from "./dlg/AddItemToList";
 import { UpdateItem } from "./dlg/UpdateItem";
 import { GetItems } from "./dlg/GetItems";
 import { GetSupermarkets } from "./dlg/GetSupermarkets";
-import { EventHandlerHook } from "./evt/EventHandlerHook";
 import { GetLocationList } from "./dlg/GetLocationList";
 import { TickLocationItem } from "./dlg/TickLocationItem";
 import { DeleteItem } from "./dlg/DeleteItem";
@@ -45,9 +44,7 @@ const config: TotoMicroserviceConfiguration = {
             { method: 'POST', path: '/games/sort/examples', delegate: SaveExample },
             { method: 'GET', path: '/games/sort/next', delegate: NextRound },
 
-            { method: 'POST', path: '/backup', delegate: StartBackup },
-
-            { method: 'POST', path: '/events', delegate: EventHandlerHook }
+            { method: 'POST', path: '/backup', delegate: StartBackup }
         ]
     }, 
     messageBusConfiguration: {

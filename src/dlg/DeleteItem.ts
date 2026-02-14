@@ -1,8 +1,8 @@
 import { Request } from "express";
-import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
+import { MessageDestination, TotoDelegate, TotoMessage, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
 import { ListStore } from "../store/ListStore";
-import { EventPublisher } from "../evt/EventPublisher";
+import moment from "moment-timezone";
 
 interface DeleteItemRequest extends TotoRequest {
     id: string;
@@ -33,7 +33,17 @@ export class DeleteItem extends TotoDelegate<DeleteItemRequest, DeleteItemRespon
             await store.deleteItem(itemId);
 
             // Publish the event on PubSub
-            await new EventPublisher(config, this.cid!, "supermarket").publishEvent(itemId, "item-deleted", `Item [${itemId}] delete from the main Supermarket List`)
+            const timestamp = moment().tz('Europe/Rome').format('YYYY.MM.DD HH:mm:ss');
+            const message: TotoMessage = {
+                timestamp: timestamp,
+                cid: this.cid!,
+                id: itemId,
+                type: "itemDeleted",
+                msg: `Item [${itemId}] delete from the main Supermarket List`,
+                data: undefined
+            };
+
+            await this.messageBus.publishMessage(new MessageDestination({ topic: "supermarket" }), message)
             
             return { deleted: true }
 

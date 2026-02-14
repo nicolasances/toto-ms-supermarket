@@ -1,8 +1,6 @@
 import { ControllerConfig } from "../Config";
 import { ListStore } from "../store/ListStore";
 import { ListItem } from "../model/ListItem";
-import { ValidationError, TotoRuntimeError } from "totoms";
-import { EventPublisher } from "../evt/EventPublisher";
 import { Db } from "mongodb";
 import { Process } from "../util/MongoTransaction";
 
@@ -12,13 +10,21 @@ export class AddItemToListProcess extends Process<{ id: string }> {
     cid: string;
     item: ListItem;
     authToken: string;
+    publishItemAdded: (itemId: string, item: ListItem, authToken: string) => Promise<void>;
 
-    constructor(authToken: string, config: ControllerConfig, cid: string, item: ListItem) {
+    constructor(
+        authToken: string,
+        config: ControllerConfig,
+        cid: string,
+        item: ListItem,
+        publishItemAdded: (itemId: string, item: ListItem, authToken: string) => Promise<void>
+    ) {
         super();
         this.config = config;
         this.cid = cid;
         this.item = item;
         this.authToken = authToken;
+        this.publishItemAdded = publishItemAdded;
     }
 
     async do(db: Db): Promise<{ id: string }> {
@@ -30,7 +36,7 @@ export class AddItemToListProcess extends Process<{ id: string }> {
         const itemId = await store.addItemToList(this.item);
 
         // Publish the event on PubSub
-        await new EventPublisher(this.config, this.cid, "supermarket").publishEvent(itemId, "item-added", `Item [${this.item.id}] added to the Supermarket List`, { item: this.item, authToken: this.authToken })
+        await this.publishItemAdded(itemId, this.item, this.authToken)
 
         // Return the created Id
         return { id: itemId }

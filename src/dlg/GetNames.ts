@@ -1,8 +1,6 @@
 import { Request } from "express";
 import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
-import { ListItem } from "../model/ListItem";
-import { EventPublisher } from "../evt/EventPublisher";
 import { ArchivedListStore } from "../store/ArchivedListStore";
 
 interface GetNamesRequest extends TotoRequest {
