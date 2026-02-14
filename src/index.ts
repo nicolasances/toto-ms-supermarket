@@ -14,6 +14,9 @@ import { SaveExample } from "./dlg/games/SaveExample";
 import { NextRound } from "./dlg/games/NextRound";
 import { StartBackup } from "./dlg/backup/StartBackup";
 import { GetNextPredictedGroceriesDay } from "./dlg/GetNextPredictedGroceriesDay";
+import { OnItemAdded } from "./evt/handlers/OnItemAdded";
+import { OnItemDeleted } from "./evt/handlers/OnItemDeleted";
+import { OnLocationListClosed } from "./evt/handlers/OnLocationListClosed";
 
 const config: TotoMicroserviceConfiguration = {
     serviceName: "toto-ms-supermarket",
@@ -45,6 +48,16 @@ const config: TotoMicroserviceConfiguration = {
             { method: 'POST', path: '/backup', delegate: StartBackup },
 
             { method: 'POST', path: '/events', delegate: EventHandlerHook }
+        ]
+    }, 
+    messageBusConfiguration: {
+        topics: [
+            {logicalName: "supermarket", secret: "topic-name-supermarket"}
+        ], 
+        messageHandlers: [
+            OnItemAdded, 
+            OnItemDeleted, 
+            OnLocationListClosed
         ]
     }
 };

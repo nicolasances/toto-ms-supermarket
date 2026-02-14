@@ -1,18 +1,15 @@
-import { AEventHandler, EventHandlingResult } from "../EventHanlder";
-import { TotoEvent } from "../TotoEvent";
-import { HandledEvents } from "../EventHandlerHook";
 import { AddItemAndSortProcess } from "../../process/AddItemAndSortProcess";
-import { Logger } from "totoms";
+import { Logger, ProcessingResponse, TotoMessage, TotoMessageHandler } from "totoms";
+import { ControllerConfig } from "../../Config";
 
-export class OnItemAdded extends AEventHandler {
+export class OnItemAdded extends TotoMessageHandler {
 
-    async handleEvent(msg: TotoEvent): Promise<EventHandlingResult> {
+    protected handledMessageType: string = "itemAdded";
+
+    async onMessage(msg: TotoMessage): Promise<ProcessingResponse> {
 
         const logger = Logger.getInstance();
-        const cid = this.cid;
-
-        // Only care about one event: item-added 
-        if (msg.type != HandledEvents.itemAdded) return {}
+        const cid = msg.cid ?? this.cid;
 
         // Extract data
         const itemId = msg.id;
@@ -24,10 +21,10 @@ export class OnItemAdded extends AEventHandler {
 
         logger.compute(cid, `Event [${msg.type}] received. Item [${itemId}] has been added. Item: [${JSON.stringify(item)}]`)
 
-        await new AddItemAndSortProcess(token, this.config, this.cid).do(item);
+        await new AddItemAndSortProcess(token, this.config as ControllerConfig, cid).do(item);
 
         logger.compute(cid, `Event [${msg.type}] successfully handled.`)
 
-        return { eventProcessed: true }
+        return { status: "processed", responsePayload: { eventProcessed: true } }
     }
 }

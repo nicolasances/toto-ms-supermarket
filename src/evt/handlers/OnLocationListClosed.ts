@@ -1,25 +1,22 @@
-import { AEventHandler, EventHandlingResult } from "../EventHanlder";
-import { TotoEvent } from "../TotoEvent";
-import { HandledEvents } from "../EventHandlerHook";
 import { ArchiveLocationListProcess } from "../../process/ArchiveLocationListProcess";
 import { DeleteAllLocationListsProcess } from "../../process/DeleteAllLocationListsProcess";
 import { DeleteMainSupermarketListProcess } from "../../process/DeleteMainSupermarketListProcess";
 import { AddItemToListProcess } from "../../process/AddItemToListProcess";
 import { MongoTransaction, Process } from "../../util/MongoTransaction";
 import { Db } from "mongodb";
-import { Logger } from "totoms";
+import { Logger, ProcessingResponse, TotoMessage, TotoMessageHandler } from "totoms";
 import { LocationListItem } from "../../model/LocationListItem";
 import { ControllerConfig } from "../../Config";
 
-export class OnLocationListClosed extends AEventHandler {
+export class OnLocationListClosed extends TotoMessageHandler {
 
-    async handleEvent(msg: TotoEvent): Promise<EventHandlingResult> {
+    protected handledMessageType: string = "locationListClosed";
+
+    async onMessage(msg: TotoMessage): Promise<ProcessingResponse> {
 
         const logger = Logger.getInstance();
-        const cid = this.cid;
-
-        // Only care about one event: location-list-closed
-        if (msg.type != HandledEvents.locationListClosed) return {}
+        const cid = msg.cid ?? this.cid;
+        const config = this.config as ControllerConfig;
 
         // Extract data
         const supermarketId = msg.id;
@@ -29,10 +26,10 @@ export class OnLocationListClosed extends AEventHandler {
         logger.compute(cid, `Event [${msg.type}] received. Supermarket [${supermarketId}] Location List has been closed. Unticked items: [${JSON.stringify(untickedItems ?? {})}]`)
 
         // Instantiate the process
-        const process = new OnLocationListClosedProcess(authToken, this.config, this.cid, supermarketId, untickedItems)
+        const process = new OnLocationListClosedProcess(authToken, config, cid, supermarketId, untickedItems)
 
         // Run the process
-        const result = await new MongoTransaction<EventHandlingResult>(this.config, this.cid).execute(process);
+        const result = await new MongoTransaction<ProcessingResponse>(config, cid).execute(process);
 
         logger.compute(cid, `Event [${msg.type}] successfully handled.`)
 
@@ -40,7 +37,7 @@ export class OnLocationListClosed extends AEventHandler {
     }
 }
 
-class OnLocationListClosedProcess extends Process<EventHandlingResult> {
+class OnLocationListClosedProcess extends Process<ProcessingResponse> {
 
     config: ControllerConfig;
     cid: string;
@@ -57,7 +54,7 @@ class OnLocationListClosedProcess extends Process<EventHandlingResult> {
         this.authToken = authToken;
     }
 
-    async do(db: Db): Promise<EventHandlingResult> {
+    async do(db: Db): Promise<ProcessingResponse> {
 
         // 1. Copy the closed location list to an archive
         await new ArchiveLocationListProcess(this.config, this.cid, this.supermarketId).do(db);
@@ -77,7 +74,7 @@ class OnLocationListClosedProcess extends Process<EventHandlingResult> {
             }
         }
 
-        return { eventProcessed: true }
+        return { status: "processed" };
     }
 
 }
