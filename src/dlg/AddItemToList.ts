@@ -25,7 +25,7 @@ export class AddItemToList extends TotoDelegate<AddItemToListRequest, AddItemToL
 
         const item = req.item;
 
-        logger.compute(this.cid!, `Adding item to the supermarket list: ${item}`)
+        logger.compute(this.cid!, `Adding item to the supermarket list: ${JSON.stringify(item)}`);
 
         // Create the process to execute
         const addItemProcess = new AddItemToListProcess(req.token, config, this.cid!, item, async (itemId, itemToPublish, authToken) => {
