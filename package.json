@@ -13,6 +13,9 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.989.0",
     "@aws-sdk/client-sns": "^3.989.0",
+    "@cfworker/json-schema": "^4.1.1",
+    "@genkit-ai/core": "^1.28.0",
+    "@genkit-ai/mcp": "^1.28.0",
     "@google-cloud/pubsub": "^4.0.6",
     "@google-cloud/secret-manager": "^5.0.1",
     "@google-cloud/storage": "^7.9.0",
@@ -20,6 +23,8 @@
     "connect-busboy": "^1.0.0",
     "express": "^4.16.2",
     "fs-extra": "^7.0.1",
+    "genkit": "^1.28.0",
+    "genkitx-aws-bedrock": "^1.14.0",
     "google-auth-library": "^7.0.2",
     "js-yaml": "^4.1.1",
     "moment-timezone": "^0.5.23",
@@ -27,7 +32,8 @@
     "path": "^0.12.7",
     "request": "^2.88.2",
     "totoms": "^2.1.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/connect-busboy": "^1.0.2",
