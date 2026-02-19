@@ -72,14 +72,19 @@ export class AgentDlg extends TotoDelegate<AgentRequest, AgentResponse> {
                     Evaluate the following list of items extracted from the user's transcription and correct it if you find any mistake. 
                     The list of items is: ${JSON.stringify(extractedList.output?.items)}. 
                     
-                    The user's transcription is: ${req.prompt}. 
+                    The user's transcription is the following: ${req.prompt}. 
                     
                     Remember that the most common items picked by the user are: ${JSON.stringify(names)}. 
 
                     ## Your task: 
                     If you find any thing that looks like a mistake, propose a correction and explain why you think it's a mistake. 
-                    DO NOT change anything, just propose corrections.
-                    Corrections are not mandatory. Only propose a correction if you are really sure that there is a mistake and that you know what the user meant.
+
+                    ## Rules
+                    - DO NOT change anything, just propose corrections.
+                    - Make sure to double check with the user's transcript, because the previous extractor might have truncated or simplified some item names, removing important terms to understand the context. 
+                        *An important example is "Bacon i tern", which might be truncated to "Bacon" but it's actually a specific type of bacon that the user usually buys and that is important to keep in the list.*
+                    - Corrections are not mandatory. Only propose a correction if you are really sure that there is a mistake and that you know what the user meant.
+                    - If the correction is the same as the corrected (extracted) item name, then it's not a correction and you should not propose it.
                 `,
                 output: {
                     schema: z.object({
@@ -115,7 +120,7 @@ export class AgentDlg extends TotoDelegate<AgentRequest, AgentResponse> {
                 }
 
             });
-            
+
             attempts++;
         }
 
