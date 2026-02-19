@@ -65,7 +65,6 @@ export class AgentDlg extends TotoDelegate<AgentRequest, AgentResponse> {
         let evaluation;
         let evaluationsHistory = [];
         while (attempts < 3) {
-            attempts++;
 
             // Evaluate the output
             evaluation = await ai.generate({
@@ -116,6 +115,8 @@ export class AgentDlg extends TotoDelegate<AgentRequest, AgentResponse> {
                 }
 
             });
+            
+            attempts++;
         }
 
         return { items: extractedList.output?.items || [], agentInfo: { attempts, evaluationsHistory } };
