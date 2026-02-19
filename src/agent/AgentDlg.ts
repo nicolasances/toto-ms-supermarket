@@ -63,6 +63,7 @@ export class AgentDlg extends TotoDelegate<AgentRequest, AgentResponse> {
         // 2. Evaluate and iterate
         let attempts = 0;
         let evaluation;
+        let evaluationsHistory = [];
         while (attempts < 3) {
             attempts++;
 
@@ -85,12 +86,20 @@ export class AgentDlg extends TotoDelegate<AgentRequest, AgentResponse> {
                     schema: z.object({
                         items: z.array(z.object({
                             name: z.string().describe("Original name of the item extracted from the user's transcription, with possible mistakes."),
-                            correction: z.string().optional().describe("Proposed correction for the item name, if a mistake was found."),
-                            reason: z.string().optional().describe("Explanation for why the correction was proposed."),
+                            correction: z.string().optional().nullable().describe("Proposed correction for the item name, if a mistake was found."),
+                            reason: z.string().optional().nullable().describe("Explanation for why the correction was proposed."),
                         }))
                     })
                 }
             });
+
+            evaluationsHistory.push(evaluation.output?.items || []);
+
+            // Check if there are any corrections proposed, if not, we can stop the iteration
+            const correctionsProposed = evaluation.output?.items.filter(item => item.correction);
+            if (!correctionsProposed || correctionsProposed.length === 0) {
+                break;
+            }
 
             // Refine 
             extractedList = await ai.generate({
@@ -109,7 +118,7 @@ export class AgentDlg extends TotoDelegate<AgentRequest, AgentResponse> {
             });
         }
 
-        return { items: extractedList.output?.items || [] };
+        return { items: extractedList.output?.items || [], agentInfo: { attempts, evaluationsHistory } };
 
     }
 
@@ -128,4 +137,8 @@ interface AgentRequest {
 
 interface AgentResponse {
     items: string[];
+    agentInfo?: {
+        attempts: number;
+        evaluationsHistory?: any[];
+    }
 }
