@@ -16,7 +16,8 @@ import { GetNextPredictedGroceriesDay } from "./dlg/GetNextPredictedGroceriesDay
 import { OnItemAdded } from "./evt/handlers/OnItemAdded";
 import { OnItemDeleted } from "./evt/handlers/OnItemDeleted";
 import { OnLocationListClosed } from "./evt/handlers/OnLocationListClosed";
-import { AgentDlg } from "./agent/AgentDlg";
+import { AgentStreamDlg } from "./agent/AgentStreamDlg";
+import { AgentPostMessageDlg } from "./agent/AgentPostMessageDlg";
 
 const config: TotoMicroserviceConfiguration = {
     serviceName: "toto-ms-supermarket",
@@ -47,7 +48,22 @@ const config: TotoMicroserviceConfiguration = {
 
             { method: 'POST', path: '/backup', delegate: StartBackup },
 
-            { method: 'POST', path: '/agent', delegate: AgentDlg }
+            { method: 'POST', path: '/agent/:agentId/conversations/:conversationId/messages', delegate: AgentPostMessageDlg }
+        ],
+        streamEndpoints: [
+            {
+                method: 'GET',
+                path: '/agents/:agentId/conversations/:conversationId/status',
+                delegate: AgentStreamDlg,
+                options: {
+                    contentType: 'text/event-stream',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Connection': 'keep-alive',
+                        'X-Accel-Buffering': 'no'
+                    }
+                }
+            }
         ]
     },
     messageBusConfiguration: {
