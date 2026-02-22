@@ -1,4 +1,4 @@
-import { TopicIdentifier, TotoMessageBus, TotoMessageHandler, TotoControllerConfig, TotoAPIController, SecretsManager, Logger, APIConfiguration, TotoEnvironment, GCPConfiguration, AzureConfiguration, AWSConfiguration, SupportedHyperscalers, MCPConfiguration } from '..';
+import { TopicIdentifier, TotoMessageBus, TotoMessageHandler, TotoControllerConfig, TotoAPIController, SecretsManager, Logger, APIConfiguration, TotoEnvironment, GCPConfiguration, AzureConfiguration, AWSConfiguration, SupportedHyperscalers, MCPConfiguration, IMessageBus, AgentsConfiguration } from '..';
 import { MCPServer } from '../mcp/MCPServer';
 
 export class TotoMicroservice {
@@ -55,7 +55,8 @@ export class TotoMicroservice {
                 controller: apiController,
                 customConfig: customConfig,
                 topics: topicNames,
-                environment: config.environment
+                environment: config.environment,
+                messageBusOverride: config.messageBusConfiguration?.messageBusOverride
             });
 
             // Register the message handlers
@@ -120,11 +121,13 @@ export interface TotoMicroserviceConfiguration {
     apiConfiguration: APIConfiguration;
     messageBusConfiguration?: MessageBusConfiguration;
     mcpConfiguration?: MCPConfiguration;
+    agentsConfiguration?: AgentsConfiguration; 
 }
 
 export interface MessageBusConfiguration {
     topics: { logicalName: string; secret: string }[];
     messageHandlers?: (new (config: TotoControllerConfig, messageBus: TotoMessageBus) => TotoMessageHandler)[];
+    messageBusOverride?: IMessageBus;
 }
 
 export function getHyperscalerConfiguration(): GCPConfiguration | AWSConfiguration | AzureConfiguration {

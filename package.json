@@ -15,6 +15,7 @@
     "@aws-sdk/client-sns": "^3.989.0",
     "@cfworker/json-schema": "^4.1.1",
     "@genkit-ai/core": "^1.28.0",
+    "@genkit-ai/google-genai": "^1.29.0",
     "@genkit-ai/mcp": "^1.28.0",
     "@google-cloud/pubsub": "^4.0.6",
     "@google-cloud/secret-manager": "^5.0.1",
@@ -42,9 +43,9 @@
     "@types/node": "^16.11.7",
     "@types/uuid": "^9.0.8",
     "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
-    "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }
 }

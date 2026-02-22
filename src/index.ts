@@ -1,4 +1,4 @@
-import { TotoMicroservice, TotoMicroserviceConfiguration, getHyperscalerConfiguration, SupportedHyperscalers } from "totoms";
+import { TotoMicroservice, TotoMicroserviceConfiguration, getHyperscalerConfiguration, SupportedHyperscalers } from "./totoms";
 import { ControllerConfig } from "./Config";
 import { AddItemToList } from "./dlg/AddItemToList";
 import { UpdateItem } from "./dlg/UpdateItem";
@@ -18,6 +18,7 @@ import { OnItemDeleted } from "./evt/handlers/OnItemDeleted";
 import { OnLocationListClosed } from "./evt/handlers/OnLocationListClosed";
 import { AgentStreamDlg } from "./agent/AgentStreamDlg";
 import { AgentPostMessageDlg } from "./agent/AgentPostMessageDlg";
+import { SuppieAgent } from "agent/SuppieAgent";
 
 const config: TotoMicroserviceConfiguration = {
     serviceName: "toto-ms-supermarket",
@@ -47,8 +48,6 @@ const config: TotoMicroserviceConfiguration = {
             { method: 'GET', path: '/games/sort/next', delegate: NextRound },
 
             { method: 'POST', path: '/backup', delegate: StartBackup },
-
-            { method: 'POST', path: '/agent/:agentId/conversations/:conversationId/messages', delegate: AgentPostMessageDlg }
         ],
         streamEndpoints: [
             {
@@ -74,6 +73,11 @@ const config: TotoMicroserviceConfiguration = {
             OnItemAdded,
             OnItemDeleted,
             OnLocationListClosed
+        ]
+    },
+    agentsConfiguration: {
+        agents: [
+            SuppieAgent
         ]
     }
 };

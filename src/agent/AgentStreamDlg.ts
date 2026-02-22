@@ -8,6 +8,7 @@ export class AgentStreamDlg extends TotoDelegate<AgentStreamRequest, Readable> {
     protected async do(req: AgentStreamRequest, userContext?: UserContext): Promise<Readable> {
 
         const stream = new Readable({ read() {} });
+        let closed = false;
 
         const send = (event: string, data: unknown) => {
             stream.push(`event: ${event}\n`);
@@ -24,8 +25,10 @@ export class AgentStreamDlg extends TotoDelegate<AgentStreamRequest, Readable> {
                 const maxWaitMs = 1000 * 60 * 5;
                 let lastIndex = 0;
                 const startedAt = Date.now();
+                let timer: NodeJS.Timeout | undefined;
 
                 const poll = () => {
+                    if (closed) return;
                     const newEvents = statusStore.getSince(req.agentId, req.conversationId, req.messageId, lastIndex);
                     if (newEvents.length > 0) {
                         for (const evt of newEvents) {
@@ -44,8 +47,18 @@ export class AgentStreamDlg extends TotoDelegate<AgentStreamRequest, Readable> {
                         return;
                     }
 
-                    setTimeout(poll, pollIntervalMs);
+                    timer = setTimeout(poll, pollIntervalMs);
                 };
+
+                stream.on("close", () => {
+                    closed = true;
+                    if (timer) clearTimeout(timer);
+                });
+
+                stream.on("end", () => {
+                    closed = true;
+                    if (timer) clearTimeout(timer);
+                });
 
                 poll();
 

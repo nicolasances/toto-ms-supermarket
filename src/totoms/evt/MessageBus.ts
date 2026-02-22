@@ -11,6 +11,7 @@ export interface TotoMessageBusConfiguration {
     customConfig: TotoControllerConfig;
     environment: TotoEnvironment;
     topics?: TopicIdentifier[];
+    messageBusOverride?: IMessageBus;
 }
 
 export interface TopicIdentifier {
@@ -58,8 +59,9 @@ export class TotoMessageBus {
         // Store the API Controller reference
         this.apiController = config.controller;
 
-        // Instantiate the Message Bus implementation
-        if (this.config.environment.hyperscaler === "aws") this.messageBus = new SNSImpl({ awsRegion: (this.config.environment.hyperscalerConfiguration as AWSConfiguration).awsRegion });
+        // Instantiate the Message Bus implementation - use override if provided, otherwise derive from hyperscaler
+        if (this.config.messageBusOverride) this.messageBus = this.config.messageBusOverride;
+        else if (this.config.environment.hyperscaler === "aws") this.messageBus = new SNSImpl({ awsRegion: (this.config.environment.hyperscalerConfiguration as AWSConfiguration).awsRegion });
         else if (this.config.environment.hyperscaler === "gcp") this.messageBus = new GCPPubSubImpl({ expectedAudience: this.config.customConfig.getExpectedAudience() });
         else throw new TotoRuntimeError(500, `Unsupported hyperscaler ${this.config.environment.hyperscaler} for Message Bus implementation`);
 

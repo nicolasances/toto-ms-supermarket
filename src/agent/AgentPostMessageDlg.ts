@@ -1,5 +1,4 @@
 import { genkit, z } from "genkit";
-import { awsBedrock } from "genkitx-aws-bedrock";
 import { TotoDelegate, UserContext, ValidationError } from "totoms";
 import { getModel } from "../util/Models";
 import { ControllerConfig } from "../Config";
@@ -32,7 +31,6 @@ export class AgentPostMessageDlg extends TotoDelegate<AgentPostMessageRequest, A
 
                 const ai = genkit({
                     plugins: [
-                        awsBedrock({ region: "eu-north-1" }),
                     ],
                     model: getModel("anthropic.claude-3.7-sonnet", "eu"),
                 });
