@@ -21,7 +21,7 @@ export class AgentStreamDlg extends TotoDelegate<AgentStreamRequest, Readable> {
 
         let count = 0;
 
-        send("connected", { message: "SSE stream connected", timestamp: new Date().toISOString() });
+        // send("connected", { message: "SSE stream connected", timestamp: new Date().toISOString() });
 
         const interval = setInterval(() => {
             if (closed) {

@@ -52,7 +52,7 @@ const config: TotoMicroserviceConfiguration = {
         streamEndpoints: [
             {
                 method: 'GET',
-                path: '/agents/:agentId/conversations/:conversationId/status',
+                path: '/conversationStatus',
                 delegate: AgentStreamDlg,
                 options: {
                     contentType: 'text/event-stream',

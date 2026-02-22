@@ -3,6 +3,7 @@ import { AgentConversationMessage } from "../model/AgentConversationMessage";
 import { GaleAgent } from "./GaleAgent";
 import { UserContext } from "../../model/UserContext";
 import { ValidationError } from "../../validation/Validator";
+import { GaleBrokerAPI } from "../integration/GaleBrokerAPI";
 
 export abstract class GaleConversationalAgent extends GaleAgent<AgentConversationMessage, AgentConversationMessage> {
 
@@ -14,7 +15,7 @@ export abstract class GaleConversationalAgent extends GaleAgent<AgentConversatio
      * @param message 
      */
     protected async publishMessage(message: AgentConversationMessage) {
-        // throw new Error("Not implemented");
+        return new GaleBrokerAPI(this.config).postConversationMessage(message);
     }
 
     /**
@@ -50,7 +51,7 @@ export abstract class GaleConversationalAgent extends GaleAgent<AgentConversatio
             message: req.body.message,
             extras: req.body.extras
         }
-        
+
     }
 
 }

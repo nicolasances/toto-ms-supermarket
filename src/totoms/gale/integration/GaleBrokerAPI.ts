@@ -3,10 +3,20 @@ import { newTotoServiceToken } from "../../auth/TotoToken";
 import { AgentManifest } from "../model/AgentManifest";
 import { TotoControllerConfig } from "../../model/TotoControllerConfig";
 import { AgentEndpoint } from "../model/AgentEndpoint";
+import { AgentConversationMessage } from "../model/AgentConversationMessage";
 
 export class GaleBrokerAPI {
 
-    constructor(private config: TotoControllerConfig) { }
+    galeBrokerURL: string;
+
+    constructor(private config: TotoControllerConfig) {
+        
+        const galeBrokerURL = process.env.GALE_BROKER_URL;
+
+        if (!galeBrokerURL) throw new Error("GALE_BROKER_URL environment variable is not set, required for Gale integration");
+        
+        this.galeBrokerURL = galeBrokerURL;
+    }
 
     /**
      * Executes the agent with the given input.
@@ -15,16 +25,12 @@ export class GaleBrokerAPI {
      */
     async registerAgent(request: RegisterAgentRequest): Promise<RegisterAgentResponse> {
 
-        const galeBrokerURL = process.env.GALE_BROKER_URL;
-
-        if (!galeBrokerURL) throw new Error("GALE_BROKER_URL environment variable is not set, required for Gale integration");
-
         const token = newTotoServiceToken(this.config);
 
         return new Promise<RegisterAgentResponse>((success, failure) => {
 
             http({
-                uri: `${galeBrokerURL}/catalog/agents`,
+                uri: `${this.galeBrokerURL}/catalog/agents`,
                 method: 'PUT',
                 headers: {
                     'x-correlation-id': 'Gale-registerAgent',
@@ -58,6 +64,42 @@ export class GaleBrokerAPI {
                     failure(error);
                 }
 
+
+            })
+        })
+
+    }
+
+    /**
+     * Posts a message to a conversation of an agent on Gale Broker. 
+     * 
+     * This is used to send messages back to the user during a conversation. 
+     * Gale Broker will store those messages and provide an SSE endpoint to the client to receive those messages in real time.
+     * 
+     * @param msg 
+     */
+    async postConversationMessage(msg: AgentConversationMessage) {
+
+        const token = newTotoServiceToken(this.config);
+
+        return new Promise<RegisterAgentResponse>((success, failure) => {
+
+            http({
+                uri: `${this.galeBrokerURL}/messages`,
+                method: 'PUT',
+                headers: {
+                    'x-correlation-id': msg.conversationId || "",
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(msg)
+            }, (err: any, resp: any, body: any) => {
+
+                if (err) {
+                    console.log(err)
+                    failure(err);
+                    return;
+                }
 
             })
         })
