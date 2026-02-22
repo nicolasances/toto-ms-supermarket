@@ -1,7 +1,8 @@
 import { Request } from "express";
 import { AgentConversationMessage } from "../model/AgentConversationMessage";
 import { GaleAgent } from "./GaleAgent";
-import { UserContext } from "totoms/model/UserContext";
+import { UserContext } from "../../model/UserContext";
+import { ValidationError } from "../../validation/Validator";
 
 export abstract class GaleConversationalAgent extends GaleAgent<AgentConversationMessage, AgentConversationMessage> {
 
@@ -34,6 +35,12 @@ export abstract class GaleConversationalAgent extends GaleAgent<AgentConversatio
     }
 
     public parseRequest(req: Request): AgentConversationMessage {
+
+        if (!req.body.conversationId) throw new ValidationError(400, "Missing conversationId");
+        if (!req.body.messageId) throw new ValidationError(400, "Missing messageId");
+        if (!req.body.agentId) throw new ValidationError(400, "Missing agentId");
+        if (!req.body.actor) throw new ValidationError(400, "Missing actor");
+        if (!req.body.message) throw new ValidationError(400, "Missing message");
 
         return {
             conversationId: req.body.conversationId,
