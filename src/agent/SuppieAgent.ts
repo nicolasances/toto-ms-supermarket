@@ -25,11 +25,16 @@ export class SuppieAgent extends GaleConversationalAgent {
         });
 
         // Immediately publish a message to the conversation to let the user know that we have received the message and we are working on it. 
+        const taskReceivedConfirmation = await ai.generate({
+            prompt: "Generate a friendly and informal SHORT message to let the user know that we have received their message and we are working on it. The message should be something like: 'Hey! I got your message and I'm working on adding the items to the shopping list for you!'", 
+            output: { schema: z.object({ confirmationMessage: z.string() }) }
+        })
+
         this.publishMessage({
             conversationId: message.conversationId,
             messageId: uuid(),
             agentId: message.agentId,
-            message: (await ai.generate("Generate a friendly and informal SHORT message to let the user know that we have received their message and we are working on it. The message should be something like: 'Hey! I got your message and I'm working on adding the items to the shopping list for you!'")).output,
+            message: taskReceivedConfirmation.output?.confirmationMessage || "I have added the items to the shopping list for you!",
             actor: "agent"
         })
 
@@ -140,6 +145,14 @@ export class SuppieAgent extends GaleConversationalAgent {
         const confirmation = await ai.generate({
             prompt: `Generate a nice sentence to the user confirming that you have added the following number of items to the shopping list: ${extractedList.output?.items.length}. The sentence should be friendly and informal, like something a helpful assistant would say. "`,
             output: { schema: z.object({ confirmationMessage: z.string() }) }
+        })
+
+        this.publishMessage({
+            conversationId: message.conversationId,
+            messageId: uuid(),
+            agentId: message.agentId,
+            message: confirmation.output?.confirmationMessage || "I have added the items to the shopping list for you!",
+            actor: "agent"
         })
 
         return {

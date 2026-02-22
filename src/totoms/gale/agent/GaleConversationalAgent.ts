@@ -4,6 +4,7 @@ import { GaleAgent } from "./GaleAgent";
 import { UserContext } from "../../model/UserContext";
 import { ValidationError } from "../../validation/Validator";
 import { GaleBrokerAPI } from "../integration/GaleBrokerAPI";
+import { Logger } from "totoms";
 
 export abstract class GaleConversationalAgent extends GaleAgent<AgentConversationMessage, AgentConversationMessage> {
 
@@ -15,6 +16,11 @@ export abstract class GaleConversationalAgent extends GaleAgent<AgentConversatio
      * @param message 
      */
     protected async publishMessage(message: AgentConversationMessage) {
+
+        const logger = Logger.getInstance();
+
+        logger.compute(message.conversationId || "", `Publishing message to conversation ${message.conversationId} for agent ${message.agentId}: ${message.message}`);
+
         return new GaleBrokerAPI(this.config).postConversationMessage(message);
     }
 
