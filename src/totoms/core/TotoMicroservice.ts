@@ -85,10 +85,11 @@ export class TotoMicroservice {
                 for (const agentConstructor of config.agentsConfiguration.agents) {
 
                     // Instantiate the agent
-                    const agent = new agentConstructor(customConfig);
+                    const agent = new agentConstructor(bus, customConfig);
 
                     // Create a conversational endpoint for the agent
-                    apiController.path('POST', `/agent/${agent.agentId}/messages`, new AgentPostMessageDlg(bus, customConfig, agent));
+                    apiController.path('POST', `/agent/${agent.getManifest().agentId}/messages`, agent);
+                }
             }
 
             // Register the streaming API endpoints
