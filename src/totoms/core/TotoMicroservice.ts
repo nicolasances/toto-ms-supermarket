@@ -100,10 +100,10 @@ export class TotoMicroservice {
                     // Register the Agent with Gale Broker
                     const galeBrokerAPI = new GaleBrokerAPI(customConfig);
 
-                    Logger.getInstance().compute("INIT", `Registering agent ${agent.getManifest().agentId} with Gale Broker at endpoint ${agentEndpoint.baseURL}${agentEndpoint.messagesPath}...`);
+                    Logger.getInstance().compute("INIT", `Registering agent [${agent.getManifest().humanFriendlyName}] with Gale Broker at endpoint [${agentEndpoint.baseURL}${agentEndpoint.messagesPath}]...`);
 
                     registrationPromises.push(galeBrokerAPI.registerAgent({
-                        agentManifest: agent.getManifest(), 
+                        agentManifest: agent.getManifest(),
                         endpoint: agentEndpoint
                     }));
                 }
