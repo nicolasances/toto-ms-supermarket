@@ -8,6 +8,13 @@ import { AgentConversationMessage } from "../totoms/gale/model/AgentConversation
 
 export class SuppieAgent extends GaleConversationalAgent {
 
+    getManifest() {
+        return {
+            agentId: "suppie", 
+            humanFriendlyName: "Suppie"
+        }
+    }
+
     async onMessage(message: AgentConversationMessage): Promise<AgentConversationMessage> {
 
         const config = this.config as ControllerConfig;

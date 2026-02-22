@@ -1,7 +1,7 @@
 import { AgentConversationMessage } from "../model/AgentConversationMessage";
 import { GaleAgent } from "./GaleAgent";
 
-export class GaleConversationalAgent extends GaleAgent {
+export abstract class GaleConversationalAgent extends GaleAgent {
 
     /**
      * Allows the Agent to publish a message to the conversation. 
