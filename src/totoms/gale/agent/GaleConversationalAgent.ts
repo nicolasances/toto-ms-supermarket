@@ -14,7 +14,7 @@ export abstract class GaleConversationalAgent extends GaleAgent<AgentConversatio
      * @param message 
      */
     protected async publishMessage(message: AgentConversationMessage) {
-        throw new Error("Not implemented");
+        // throw new Error("Not implemented");
     }
 
     /**

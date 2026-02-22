@@ -90,7 +90,7 @@ export class TotoMicroservice {
                     const agent = new agentConstructor(bus, customConfig);
 
                     // Create a conversational endpoint for the agent
-                    apiController.path('POST', `/agent/${agent.getManifest().agentId}/messages`, agent);
+                    apiController.path('POST', `/agents/${agent.getManifest().agentId}/messages`, agent);
                 }
             }
 
