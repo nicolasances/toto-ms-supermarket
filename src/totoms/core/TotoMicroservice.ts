@@ -1,5 +1,7 @@
+import { GaleBrokerAPI } from 'totoms/gale/integration/GaleBrokerAPI';
 import { TopicIdentifier, TotoMessageBus, TotoMessageHandler, TotoControllerConfig, TotoAPIController, SecretsManager, Logger, APIConfiguration, TotoEnvironment, GCPConfiguration, AzureConfiguration, AWSConfiguration, SupportedHyperscalers, MCPConfiguration, IMessageBus, AgentsConfiguration } from '..';
 import { MCPServer } from '../mcp/MCPServer';
+import { AgentEndpoint } from 'totoms/gale/model/AgentEndpoint';
 
 export class TotoMicroservice {
 
@@ -45,7 +47,7 @@ export class TotoMicroservice {
         }
 
         // Load the customer configuration
-        TotoMicroservice.instancePromise = customConfig.load().then(() => {
+        TotoMicroservice.instancePromise = customConfig.load().then(async () => {
 
             // Create the API controller
             const apiController = new TotoAPIController({ apiName: config.serviceName, config: customConfig, environment: config.environment }, { basePath: config.basePath, openAPISpecification: config.apiConfiguration.openAPISpecification, port: config.port });
@@ -76,13 +78,13 @@ export class TotoMicroservice {
 
                     // Add the endpoint to the controller
                     apiController.path(endpoint.method, endpoint.path, delegateInstance, endpoint.options);
-
-                    // TODO: register the Agent with Gale Broker
                 }
             }
 
             // Register Agents
             if (config.agentsConfiguration && config.agentsConfiguration.agents) {
+
+                const registrationPromises = [];
 
                 for (const agentConstructor of config.agentsConfiguration.agents) {
 
@@ -90,8 +92,26 @@ export class TotoMicroservice {
                     const agent = new agentConstructor(bus, customConfig);
 
                     // Create a conversational endpoint for the agent
-                    apiController.path('POST', `/agents/${agent.getManifest().agentId}/messages`, agent);
+                    const agentEndpoint = AgentEndpoint.fromAgentManifest(agent.getManifest());
+
+                    // Register the endpoint with the API controller
+                    apiController.path('POST', agentEndpoint.messagesPath, agent);
+
+                    // Register the Agent with Gale Broker
+                    const galeBrokerAPI = new GaleBrokerAPI(customConfig);
+
+                    Logger.getInstance().compute("INIT", `Registering agent ${agent.getManifest().agentId} with Gale Broker at endpoint ${agentEndpoint.baseURL}${agentEndpoint.messagesPath}...`);
+
+                    registrationPromises.push(galeBrokerAPI.registerAgent({
+                        agentManifest: agent.getManifest(), 
+                        endpoint: agentEndpoint
+                    }));
                 }
+
+                // Wait for all registrations to complete
+                await Promise.all(registrationPromises);
+
+                Logger.getInstance().compute("INIT", `Registered ${registrationPromises.length} agents with Gale Broker.`);
             }
 
             // Register the streaming API endpoints
@@ -111,7 +131,7 @@ export class TotoMicroservice {
             let mcpServer: MCPServer | undefined = undefined;
             if (config.mcpConfiguration?.enableMCP) {
 
-                mcpServer = new MCPServer(apiController, config.mcpConfiguration.serverConfiguration, customConfig, {basePath: config.basePath} );
+                mcpServer = new MCPServer(apiController, config.mcpConfiguration.serverConfiguration, customConfig, { basePath: config.basePath });
 
             }
 
@@ -136,7 +156,7 @@ export interface TotoMicroserviceConfiguration {
     apiConfiguration: APIConfiguration;
     messageBusConfiguration?: MessageBusConfiguration;
     mcpConfiguration?: MCPConfiguration;
-    agentsConfiguration?: AgentsConfiguration; 
+    agentsConfiguration?: AgentsConfiguration;
 }
 
 export interface MessageBusConfiguration {

@@ -2,10 +2,11 @@ import http from "request";
 import { newTotoServiceToken } from "../../auth/TotoToken";
 import { AgentManifest } from "../model/AgentManifest";
 import { TotoControllerConfig } from "../../model/TotoControllerConfig";
+import { AgentEndpoint } from "../model/AgentEndpoint";
 
 export class GaleBrokerAPI {
 
-    constructor(private galeBrokerURL: string, private config: TotoControllerConfig) { }
+    constructor(private config: TotoControllerConfig) { }
 
     /**
      * Executes the agent with the given input.
@@ -14,12 +15,16 @@ export class GaleBrokerAPI {
      */
     async registerAgent(request: RegisterAgentRequest): Promise<RegisterAgentResponse> {
 
+        const galeBrokerURL = process.env.GALE_BROKER_URL;
+
+        if (!galeBrokerURL) throw new Error("GALE_BROKER_URL environment variable is not set, required for Gale integration");
+
         const token = newTotoServiceToken(this.config);
 
         return new Promise<RegisterAgentResponse>((success, failure) => {
 
             http({
-                uri: `${this.galeBrokerURL}/catalog/agents`,
+                uri: `${galeBrokerURL}/catalog/agents`,
                 method: 'PUT',
                 headers: {
                     'x-correlation-id': 'Gale-registerAgent',
@@ -56,7 +61,9 @@ export class GaleBrokerAPI {
 
 export interface RegisterAgentRequest {
     agentManifest: AgentManifest;
+    endpoint: AgentEndpoint;
 }
+
 export class RegisterAgentResponse {
 
     constructor(private modifiedCount: number) { }
