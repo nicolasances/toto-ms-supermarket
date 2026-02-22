@@ -31,7 +31,13 @@ export class GaleBrokerAPI {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(request)
+                body: JSON.stringify({
+                    name: request.agentManifest.humanFriendlyName,
+                    agentId: request.agentManifest.agentId,
+                    agentType: request.agentManifest.agentType,
+                    description: request.agentManifest.description,
+                    endpoint: request.endpoint
+                })
             }, (err: any, resp: any, body: any) => {
 
                 if (err) {

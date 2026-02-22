@@ -397,7 +397,7 @@ export class TotoAPIController {
         else this.app.get(correctedPath, handleRequest);
 
         // Log the added path
-        logger.compute("INIT", '[' + this.apiName + '] - Successfully added method ' + method + ' ' + correctedPath);
+        logger.compute("INIT", 'Successfully added method ' + method + ' ' + correctedPath);
     }
 
     /**

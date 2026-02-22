@@ -3,15 +3,15 @@ import { vertexAI } from "@genkit-ai/google-genai";
 import { genkit, z } from "genkit";
 import { ArchivedListStore } from "store/ArchivedListStore";
 import { v4 as uuid } from "uuid";
-import { GaleConversationalAgent } from "../totoms/gale/agent/GaleConversationalAgent";
-import { AgentConversationMessage } from "../totoms/gale/model/AgentConversationMessage";
+import { AgentConversationMessage, GaleConversationalAgent, AgentManifest } from "../totoms";
 
 export class SuppieAgent extends GaleConversationalAgent {
 
-    getManifest() {
+    getManifest(): AgentManifest {
         return {
-            agentId: "suppie", 
-            humanFriendlyName: "Suppie"
+            agentType: "conversational",
+            agentId: "suppie",
+            humanFriendlyName: "Suppie",
         }
     }
 
