@@ -76,6 +76,8 @@ export class TotoMicroservice {
 
                     // Add the endpoint to the controller
                     apiController.path(endpoint.method, endpoint.path, delegateInstance, endpoint.options);
+
+                    // TODO: register the Agent with Gale Broker
                 }
             }
 

@@ -61,7 +61,7 @@ class NextRoundProcess extends Process<RoundData | null> {
         const logger = Logger.getInstance();
 
         // Sample 2 random items from the archived lists
-        const items = await new ArchivedListStore(db, this.cid, this.config).sampleRandomItems(2)
+        const items = await new ArchivedListStore(db, this.config).sampleRandomItems(2)
 
         // Check that there were two samples
         if (items.length != 2) {
