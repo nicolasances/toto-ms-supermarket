@@ -1,7 +1,9 @@
-import { TotoDelegate, UserContext, ValidationError } from "totoms";
+import { TotoDelegate, UserContext } from "totoms";
 import { Request } from "express";
 import { Readable } from "stream";
-import { AgentStatusStore } from "../store/AgentStatusStore";
+
+const INTERVAL_MS = 3000;
+const MAX_MESSAGES = 10;
 
 export class AgentStreamDlg extends TotoDelegate<AgentStreamRequest, Readable> {
 
@@ -15,81 +17,36 @@ export class AgentStreamDlg extends TotoDelegate<AgentStreamRequest, Readable> {
             stream.push(`data: ${JSON.stringify(data)}\n\n`);
         };
 
-        const statusStore = new AgentStatusStore();
+        stream.on("close", () => { closed = true; });
 
-        const run = async () => {
-            try {
-                send("ready", { status: "connected" });
+        let count = 0;
 
-                const pollIntervalMs = 1000;
-                const maxWaitMs = 1000 * 60 * 5;
-                let lastIndex = 0;
-                const startedAt = Date.now();
-                let timer: NodeJS.Timeout | undefined;
+        send("connected", { message: "SSE stream connected", timestamp: new Date().toISOString() });
 
-                const poll = () => {
-                    if (closed) return;
-                    const newEvents = statusStore.getSince(req.agentId, req.conversationId, req.messageId, lastIndex);
-                    if (newEvents.length > 0) {
-                        for (const evt of newEvents) {
-                            send(evt.type, evt.data);
-                            if (evt.type === "done" || evt.type === "error") {
-                                stream.push(null);
-                                return;
-                            }
-                        }
-                        lastIndex += newEvents.length;
-                    }
-
-                    if (Date.now() - startedAt > maxWaitMs) {
-                        send("timeout", { message: "Stream timed out" });
-                        stream.push(null);
-                        return;
-                    }
-
-                    timer = setTimeout(poll, pollIntervalMs);
-                };
-
-                stream.on("close", () => {
-                    closed = true;
-                    if (timer) clearTimeout(timer);
-                });
-
-                stream.on("end", () => {
-                    closed = true;
-                    if (timer) clearTimeout(timer);
-                });
-
-                poll();
-
-            } catch (error) {
-                send("error", { message: `${error}` });
-                stream.push(null);
+        const interval = setInterval(() => {
+            if (closed) {
+                clearInterval(interval);
+                return;
             }
-        };
 
-        void run();
+            count++;
+            send("ping", { message: `Ping #${count}`, timestamp: new Date().toISOString() });
+
+            if (count >= MAX_MESSAGES) {
+                send("done", { message: "Stream complete", totalMessages: count });
+                stream.push(null);
+                clearInterval(interval);
+            }
+        }, INTERVAL_MS);
 
         return stream;
-
     }
 
     parseRequest(req: Request): AgentStreamRequest {
-        const agentId = String(req.params.agentId || "").trim();
-        const conversationId = String(req.params.conversationId || "").trim();
-        const messageId = String(req.query.messageId || "").trim();
-
-        if (!agentId) throw new ValidationError(400, "No agentId provided");
-        if (!conversationId) throw new ValidationError(400, "No conversationId provided");
-        if (!messageId) throw new ValidationError(400, "No messageId provided");
-
-        return { agentId, conversationId, messageId };
+        return {};
     }
 
 }
 
-interface AgentStreamRequest {
-    agentId: string;
-    conversationId: string;
-    messageId: string;
-}
+interface AgentStreamRequest {}
+

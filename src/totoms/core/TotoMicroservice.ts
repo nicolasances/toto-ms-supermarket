@@ -109,7 +109,12 @@ export class TotoMicroservice {
                 }
 
                 // Wait for all registrations to complete
-                await Promise.all(registrationPromises);
+                try {
+                    await Promise.all(registrationPromises);
+                }
+                catch (error) {
+                    Logger.getInstance().compute("INIT", `Failed to register agents with Gale Broker: ${error}`);
+                }
 
                 Logger.getInstance().compute("INIT", `Registered ${registrationPromises.length} agents with Gale Broker.`);
             }
