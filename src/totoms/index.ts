@@ -29,5 +29,8 @@ export { TotoMCPDelegate } from './mcp/TotoMCPDelegate'
 export { TotoMCPToolDefinition } from './mcp/TotoMCPToolDefinition'
 export { TotoMessageHandler, ProcessingResponse } from './evt/TotoMessageHandler';
 export { DevQImpl } from './evt/impl/other/DevQImpl';
-export { TotoAgent } from './model/TotoAgent';
 export { AgentsConfiguration } from './model/AgentsConfiguration';
+export { GaleAgent } from './gale/agent/GaleAgent';
+export { GaleConversationalAgent } from './gale/agent/GaleConversationalAgent';
+export { AgentManifest } from './gale/model/AgentManifest';
+export { AgentConversationMessage } from './gale/model/AgentConversationMessage';
