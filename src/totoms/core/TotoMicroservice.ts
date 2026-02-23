@@ -1,7 +1,7 @@
-import { GaleBrokerAPI } from 'totoms/gale/integration/GaleBrokerAPI';
+import { GaleBrokerAPI } from '../gale/integration/GaleBrokerAPI';
 import { TopicIdentifier, TotoMessageBus, TotoMessageHandler, TotoControllerConfig, TotoAPIController, SecretsManager, Logger, APIConfiguration, TotoEnvironment, GCPConfiguration, AzureConfiguration, AWSConfiguration, SupportedHyperscalers, MCPConfiguration, IMessageBus, AgentsConfiguration } from '..';
 import { MCPServer } from '../mcp/MCPServer';
-import { AgentEndpoint } from 'totoms/gale/model/AgentEndpoint';
+import { AgentEndpoint } from '../gale/model/AgentEndpoint';
 
 export class TotoMicroservice {
 
