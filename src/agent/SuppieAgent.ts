@@ -18,6 +18,7 @@ export class SuppieAgent extends GaleConversationalAgent {
     async onMessage(message: AgentConversationMessage): Promise<AgentConversationMessage> {
 
         const config = this.config as ControllerConfig;
+        const streamId = uuid();
 
         const ai = genkit({
             plugins: [vertexAI()],
@@ -26,7 +27,7 @@ export class SuppieAgent extends GaleConversationalAgent {
 
         // Immediately publish a message to the conversation to let the user know that we have received the message and we are working on it. 
         const taskReceivedConfirmation = await ai.generate({
-            prompt: "Generate a friendly and informal SHORT message to let the user know that we have received their message and we are working on it. The message should be something like: 'Hey! I got your message and I'm working on adding the items to the shopping list for you!'", 
+            prompt: "Generate a friendly and informal SHORT message to let the user know that we have received their message and we are working on it. The message should be something like: 'Hey! I got your message and I'm working on adding the items to the shopping list for you!'",
             output: { schema: z.object({ confirmationMessage: z.string() }) }
         })
 
@@ -35,7 +36,8 @@ export class SuppieAgent extends GaleConversationalAgent {
             messageId: uuid(),
             agentId: message.agentId,
             message: taskReceivedConfirmation.output?.confirmationMessage || "I have added the items to the shopping list for you!",
-            actor: "agent"
+            actor: "agent",
+            stream: { streamId, sequenceNumber: 1, last: false }
         })
 
         // 1. Get the names from the DB to give the AI an idea of the most common items picked by the user.
@@ -152,7 +154,8 @@ export class SuppieAgent extends GaleConversationalAgent {
             messageId: uuid(),
             agentId: message.agentId,
             message: confirmation.output?.confirmationMessage || "I have added the items to the shopping list for you!",
-            actor: "agent"
+            actor: "agent",
+            stream: { streamId, sequenceNumber: 2, last: true }
         })
 
         return {
