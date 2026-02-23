@@ -81,6 +81,19 @@ export class TotoMicroservice {
                 }
             }
 
+            // Register the streaming API endpoints
+            if (config.apiConfiguration && config.apiConfiguration.streamEndpoints) {
+
+                for (const endpoint of config.apiConfiguration.streamEndpoints) {
+
+                    // Create an instance of the delegate
+                    const delegateInstance = new endpoint.delegate(bus, customConfig);
+
+                    // Add the endpoint to the controller
+                    apiController.streamGET(endpoint.path, delegateInstance, endpoint.options);
+                }
+            }
+
             // Register Agents
             if (config.agentsConfiguration && config.agentsConfiguration.agents) {
 
@@ -117,19 +130,6 @@ export class TotoMicroservice {
                 }
 
                 Logger.getInstance().compute("INIT", `Registered ${registrationPromises.length} agents with Gale Broker.`);
-            }
-
-            // Register the streaming API endpoints
-            if (config.apiConfiguration && config.apiConfiguration.streamEndpoints) {
-
-                for (const endpoint of config.apiConfiguration.streamEndpoints) {
-
-                    // Create an instance of the delegate
-                    const delegateInstance = new endpoint.delegate(bus, customConfig);
-
-                    // Add the endpoint to the controller
-                    apiController.streamGET(endpoint.path, delegateInstance, endpoint.options);
-                }
             }
 
             // Create the MCP Server if enabled

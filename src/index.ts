@@ -50,19 +50,7 @@ const config: TotoMicroserviceConfiguration = {
             { method: 'POST', path: '/backup', delegate: StartBackup },
         ],
         streamEndpoints: [
-            {
-                method: 'GET',
-                path: '/conversationStatus',
-                delegate: AgentStreamDlg,
-                options: {
-                    contentType: 'text/event-stream',
-                    headers: {
-                        'Cache-Control': 'no-cache',
-                        'Connection': 'keep-alive',
-                        'X-Accel-Buffering': 'no'
-                    }
-                }
-            }
+            { method: 'GET', path: '/conversationStatus', delegate: AgentStreamDlg, options: { sseEndpoint: true } }
         ]
     },
     messageBusConfiguration: {

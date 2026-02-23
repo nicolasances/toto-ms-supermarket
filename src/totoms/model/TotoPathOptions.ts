@@ -28,4 +28,9 @@ export interface TotoPathOptions {
      */
     ignoreBasePath?: boolean
 
+    /**
+     * Pass true if you want to make sure that all typical headers and content-type needed for SSE are set. 
+     */
+    sseEndpoint?: boolean;
+
 }

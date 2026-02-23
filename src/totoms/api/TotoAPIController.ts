@@ -156,14 +156,22 @@ export class TotoAPIController {
                 const cid = String(req.headers['x-correlation-id']);
                 delegate.setCorrelationId(cid);
 
-                logger.apiIn(req.headers['x-correlation-id'], 'GET', correctedPath);
+                logger.apiIn(cid, 'GET', correctedPath);
 
                 const totoRequest =  delegate.parseRequest(req);
 
                 // Execute the GET
                 delegate.processRequest(totoRequest, userContext).then((stream) => {
 
-                    // Add any additional configured headers
+                    // SSE Configuration
+                    if (options && options.sseEndpoint) {
+                        res.header('Content-Type', "text/event-stream");
+                        res.header('Cache-Control', "no-cache");
+                        res.header('Connection', "keep-alive");
+                        res.header('X-Accel-Buffering', "no"); // Typically used for NGINX optimization (avoids buffering)
+                    }
+
+                    // Add any additional configured headers (overriding)
                     if (options && options.contentType) res.header('Content-Type', options.contentType);
                     if (options && options.headers) {
                         for (const [key, value] of Object.entries(options.headers)) {
@@ -173,6 +181,7 @@ export class TotoAPIController {
 
                     // stream must be a stream: e.g. var stream = bucket.file('Toast.jpg').createReadStream();
                     res.writeHead(200);
+
                     if (typeof (res as any).flushHeaders === 'function') (res as any).flushHeaders();
 
                     stream.on('data', (data: any) => {
@@ -182,6 +191,7 @@ export class TotoAPIController {
                     stream.on('end', () => {
                         res.end();
                     });
+                    
                 }, (err) => {
                     // Log
                     logger.compute(req.headers['x-correlation-id'], err, 'error');
