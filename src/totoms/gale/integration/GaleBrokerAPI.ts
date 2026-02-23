@@ -4,6 +4,7 @@ import { AgentManifest } from "../model/AgentManifest";
 import { TotoControllerConfig } from "../../model/TotoControllerConfig";
 import { AgentEndpoint } from "../model/AgentEndpoint";
 import { AgentConversationMessage } from "../model/AgentConversationMessage";
+import { Logger } from "../../logger/TotoLogger";
 
 export class GaleBrokerAPI {
 
@@ -86,7 +87,7 @@ export class GaleBrokerAPI {
 
             http({
                 uri: `${this.galeBrokerURL}/messages`,
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'x-correlation-id': msg.conversationId || "",
                     'Authorization': `Bearer ${token}`,
@@ -100,6 +101,8 @@ export class GaleBrokerAPI {
                     failure(err);
                     return;
                 }
+
+                Logger.getInstance().compute(msg.conversationId || "", `Received answer from Gale Broker: ${body}`);
 
             })
         })
