@@ -3,7 +3,7 @@ import { vertexAI } from "@genkit-ai/google-genai";
 import { genkit, z } from "genkit";
 import { ArchivedListStore } from "store/ArchivedListStore";
 import { v4 as uuid } from "uuid";
-import { AgentConversationMessage, GaleConversationalAgent, AgentManifest } from "../totoms";
+import { AgentConversationMessage, GaleConversationalAgent, AgentManifest } from "totoms";
 
 export class SuppieAgent extends GaleConversationalAgent {
 

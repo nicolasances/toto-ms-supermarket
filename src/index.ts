@@ -1,4 +1,4 @@
-import { TotoMicroservice, TotoMicroserviceConfiguration, getHyperscalerConfiguration, SupportedHyperscalers } from "./totoms";
+import { TotoMicroservice, TotoMicroserviceConfiguration, getHyperscalerConfiguration, SupportedHyperscalers } from "totoms";
 import { ControllerConfig } from "./Config";
 import { AddItemToList } from "./dlg/AddItemToList";
 import { UpdateItem } from "./dlg/UpdateItem";
@@ -16,8 +16,6 @@ import { GetNextPredictedGroceriesDay } from "./dlg/GetNextPredictedGroceriesDay
 import { OnItemAdded } from "./evt/handlers/OnItemAdded";
 import { OnItemDeleted } from "./evt/handlers/OnItemDeleted";
 import { OnLocationListClosed } from "./evt/handlers/OnLocationListClosed";
-import { AgentStreamDlg } from "./agent/AgentStreamDlg";
-import { AgentPostMessageDlg } from "./agent/AgentPostMessageDlg";
 import { SuppieAgent } from "agent/SuppieAgent";
 
 const config: TotoMicroserviceConfiguration = {
@@ -49,9 +47,6 @@ const config: TotoMicroserviceConfiguration = {
 
             { method: 'POST', path: '/backup', delegate: StartBackup },
         ],
-        streamEndpoints: [
-            { method: 'GET', path: '/conversationStatus', delegate: AgentStreamDlg, options: { sseEndpoint: true } }
-        ]
     },
     messageBusConfiguration: {
         topics: [
