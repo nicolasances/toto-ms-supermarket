@@ -31,7 +31,7 @@ export class GetNames extends TotoDelegate<GetNamesRequest, GetNamesResponse> {
             const db = await config.getMongoDb(config.getDBName());
 
             // Create the store
-            const store = new ArchivedListStore(db, this.cid!, config);
+            const store = new ArchivedListStore(db, config);
 
             // Get the names
             const names = await store.getDistinctItemNames(300);

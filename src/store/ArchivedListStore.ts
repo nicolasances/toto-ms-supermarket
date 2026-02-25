@@ -18,12 +18,10 @@ export const F_DATE = "date";
 export class ArchivedListStore {
 
     db: Db;
-    cid: string;
     config: ControllerConfig;
 
-    constructor(db: Db, cid: string, config: ControllerConfig) {
+    constructor(db: Db, config: ControllerConfig) {
         this.db = db;
-        this.cid = cid;
         this.config = config;
     }
 

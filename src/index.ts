@@ -16,6 +16,7 @@ import { GetNextPredictedGroceriesDay } from "./dlg/GetNextPredictedGroceriesDay
 import { OnItemAdded } from "./evt/handlers/OnItemAdded";
 import { OnItemDeleted } from "./evt/handlers/OnItemDeleted";
 import { OnLocationListClosed } from "./evt/handlers/OnLocationListClosed";
+import { SuppieAgent } from "agent/SuppieAgent";
 
 const config: TotoMicroserviceConfiguration = {
     serviceName: "toto-ms-supermarket",
@@ -44,17 +45,22 @@ const config: TotoMicroserviceConfiguration = {
             { method: 'POST', path: '/games/sort/examples', delegate: SaveExample },
             { method: 'GET', path: '/games/sort/next', delegate: NextRound },
 
-            { method: 'POST', path: '/backup', delegate: StartBackup }
-        ]
-    }, 
+            { method: 'POST', path: '/backup', delegate: StartBackup },
+        ],
+    },
     messageBusConfiguration: {
         topics: [
-            {logicalName: "supermarket", secret: "topic-name-supermarket"}
-        ], 
+            { logicalName: "supermarket", secret: "topic-name-supermarket" }
+        ],
         messageHandlers: [
-            OnItemAdded, 
-            OnItemDeleted, 
+            OnItemAdded,
+            OnItemDeleted,
             OnLocationListClosed
+        ]
+    },
+    agentsConfiguration: {
+        agents: [
+            SuppieAgent
         ]
     }
 };
