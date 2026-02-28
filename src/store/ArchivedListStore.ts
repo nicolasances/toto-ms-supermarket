@@ -31,7 +31,7 @@ export class ArchivedListStore {
      * 
      * @param maxItems max num of items to extract
      */
-    async getDistinctItemNames(maxItems: number = 200) {
+    async getDistinctItemNames(maxItems: number = 200): Promise<string[]> {
 
         // Aggregation pipeline
         const pipeline = []
