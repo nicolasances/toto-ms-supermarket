@@ -26,16 +26,16 @@ export class SuppieAgent extends GaleConversationalAgent {
         });
 
         // Immediately publish a message to the conversation to let the user know that we have received the message and we are working on it. 
-        const taskReceivedConfirmation = await ai.generate({
-            prompt: "Generate a friendly and informal SHORT message to let the user know that we have received their message and we are working on it. The message should be something like: 'Hey! I got your message and I'm working on adding the items to the shopping list for you!'",
-            output: { schema: z.object({ confirmationMessage: z.string() }) }
-        })
+        // const taskReceivedConfirmation = await ai.generate({
+        //     prompt: "Generate a friendly and informal SHORT message to let the user know that we have received their message and we are working on it. The message should be something like: 'Hey! I got your message and I'm working on adding the items to the shopping list for you!'",
+        //     output: { schema: z.object({ confirmationMessage: z.string() }) }
+        // })
 
         this.publishMessage({
             conversationId: message.conversationId,
             messageId: uuid(),
             agentId: message.agentId,
-            message: taskReceivedConfirmation.output?.confirmationMessage || "I have added the items to the shopping list for you!",
+            message: "I'm on it!",
             actor: "agent",
             stream: { streamId, sequenceNumber: 1, last: false }
         })
@@ -57,7 +57,7 @@ export class SuppieAgent extends GaleConversationalAgent {
         // 2.1. First iteration to get the list of items, but not in a structured way, just to let the AI do its best to interpret the user input and correct the mispelled items.
         let extractedList = await ai.generate({
             prompt: `
-                        You are a supermarket experts that knows all typical items that can be found in a supermarket in Denmark and Italy. 
+                        You are a grocery shopping expert that knows all typical items that can be found in a supermarket in Denmark and Italy. 
                         You know ALL the names of grocery items in English (main language), Danish and Italian (second languages). 
                         You will receive lists of supermarket items (groceries shopping list) made by a user. 
                         The list is made from a AI-generated transcript of an audio recording where the user recorded items to be bought at the supermarket. 
