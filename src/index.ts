@@ -13,6 +13,8 @@ import { SaveExample } from "./dlg/games/SaveExample";
 import { NextRound } from "./dlg/games/NextRound";
 import { StartBackup } from "./dlg/backup/StartBackup";
 import { GetNextPredictedGroceriesDay } from "./dlg/GetNextPredictedGroceriesDay";
+import { GetPreferences } from "./dlg/GetPreferences";
+import { SetPreferences } from "./dlg/SetPreferences";
 import { OnItemAdded } from "./evt/handlers/OnItemAdded";
 import { OnItemDeleted } from "./evt/handlers/OnItemDeleted";
 import { OnLocationListClosed } from "./evt/handlers/OnLocationListClosed";
@@ -41,6 +43,9 @@ const config: TotoMicroserviceConfiguration = {
             { method: 'GET', path: '/names', delegate: GetNames },
 
             { method: 'GET', path: '/predictions/nesu', delegate: GetNextPredictedGroceriesDay },
+
+            { method: 'GET', path: '/preferences', delegate: GetPreferences },
+            { method: 'POST', path: '/preferences', delegate: SetPreferences },
 
             { method: 'POST', path: '/games/sort/examples', delegate: SaveExample },
             { method: 'GET', path: '/games/sort/next', delegate: NextRound },
