@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { TotoDelegate, UserContext, TotoRequest, Logger } from "totoms";
+import { TotoDelegate, UserContext, TotoRequest, Logger, ValidationError } from "totoms";
 import { ControllerConfig } from "../Config";
 import { SettingsStore } from "../store/SettingsStore";
 import { Preferences } from "../model/Preferences";
@@ -19,13 +19,15 @@ export class SetPreferences extends TotoDelegate<SetPreferencesRequest, SetPrefe
         const config = this.config as ControllerConfig;
         const logger = Logger.getInstance();
 
+        if (!userContext?.email) throw new ValidationError(401, 'User context with email is required');
+
         try {
 
             const db = await config.getMongoDb(config.getDBName());
 
             const store = new SettingsStore(db, this.cid!, config);
 
-            await store.setPreferences(req.preferences);
+            await store.setPreferences(userContext.email, req.preferences);
 
             return { updated: true };
 

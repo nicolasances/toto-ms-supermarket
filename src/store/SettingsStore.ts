@@ -14,15 +14,15 @@ export class SettingsStore {
         this.config = config;
     }
 
-    async getPreferences(): Promise<Preferences> {
-        const doc = await this.db.collection(this.config.getCollections().settings).findOne({ settingsId: 'global' });
+    async getPreferences(userEmail: string): Promise<Preferences> {
+        const doc = await this.db.collection(this.config.getCollections().settings).findOne({ userEmail });
         if (!doc) return new Preferences(false, false);
         return Preferences.fromMongoBSON(doc);
     }
 
-    async setPreferences(preferences: Preferences): Promise<void> {
+    async setPreferences(userEmail: string, preferences: Preferences): Promise<void> {
         await this.db.collection(this.config.getCollections().settings).updateOne(
-            { settingsId: 'global' },
+            { userEmail },
             { $set: { chatMode: preferences.chatMode, readAloudMode: preferences.readAloudMode } },
             { upsert: true }
         );
