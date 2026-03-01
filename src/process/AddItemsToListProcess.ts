@@ -7,7 +7,7 @@ import { Process } from "../util/MongoTransaction";
 /**
  * Adds multiple items to the list in a single transaction.
  */
-export class AddItemsToListProcess extends Process<{ id: string }> {
+export class AddItemsToListProcess extends Process<{ id: string } | null> {
 
     config: ControllerConfig;
     cid: string;
@@ -30,10 +30,18 @@ export class AddItemsToListProcess extends Process<{ id: string }> {
         this.publishItemAdded = publishItemAdded;
     }
 
-    async do(db: Db): Promise<{ id: string }> {
+    async do(db: Db): Promise<{ id: string } | null> {
 
         // Create the store
         const store = new ListStore(db, this.cid, this.config);
+
+        // Remove items that are already there
+        const existingItems = await store.getItems();
+        const existingItemNames = existingItems.map(item => item.name.toLowerCase());
+        
+        this.items = this.items.filter(item => !existingItemNames.includes(item.name.toLowerCase()));
+
+        if (this.items.length === 0) return null;
 
         // Save the item
         const itemIds = await store.addItemsToList(this.items);

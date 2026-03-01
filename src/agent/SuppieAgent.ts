@@ -117,6 +117,14 @@ export class SuppieAgent extends GaleConversationalAgent {
             });
 
             await addItemProcess.do(db);
+
+            return {
+                conversationId: message.conversationId,
+                messageId: message.messageId,
+                agentId: message.agentId,
+                message: "Done. Added the items to the shopping list.",
+                actor: "agent"
+            }
         }
         else if (intent.output?.intent === "removeItems") {
             throw new Error("Not implemented yet");
