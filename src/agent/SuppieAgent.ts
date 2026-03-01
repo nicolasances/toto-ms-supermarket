@@ -29,12 +29,6 @@ export class SuppieAgent extends GaleConversationalAgent {
         // Instantiate the DB
         const db = await config.getMongoDb(config.getDBName());
 
-        // Create the store
-        const store = new ArchivedListStore(db, config);
-
-        // Get the names (top 300)
-        const names = await store.getDistinctItemNames(300);
-
         const ai = genkit({
             plugins: [vertexAI()],
             model: vertexAI.model('gemini-2.0-flash')
@@ -96,7 +90,7 @@ export class SuppieAgent extends GaleConversationalAgent {
                     output: { schema: z.object({ confirmationMessage: z.string() }) }
                 })).output?.confirmationMessage || "I have added the items to the shopping list for you!",
                 actor: "agent",
-                stream: { streamId, sequenceNumber: streamMessageIndex++, last: false }
+                stream: { streamId, sequenceNumber: streamMessageIndex++, last: true }
             })
 
             // TODO: Add the items to the shopping list in the DB
@@ -127,7 +121,25 @@ export class SuppieAgent extends GaleConversationalAgent {
             }
         }
         else if (intent.output?.intent === "removeItems") {
-            throw new Error("Not implemented yet");
+
+            this.publishMessage({
+                conversationId: message.conversationId,
+                messageId: uuid(),
+                agentId: message.agentId,
+                message: "Sorry, I cannot remove items from the shopping list yet.",
+                actor: "agent",
+                stream: { streamId, sequenceNumber: streamMessageIndex++, last: true }
+            })
+        }
+        else {
+            this.publishMessage({
+                conversationId: message.conversationId,
+                messageId: uuid(),
+                agentId: message.agentId,
+                message: "Sorry, I cannot understand your request. I can only add or remove items from the shopping list for now.",
+                actor: "agent",
+                stream: { streamId, sequenceNumber: streamMessageIndex++, last: true }
+            })
         }
 
         return {
