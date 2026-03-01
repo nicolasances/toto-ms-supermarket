@@ -3,9 +3,11 @@ import { vertexAI } from "@genkit-ai/google-genai";
 import { genkit, z } from "genkit";
 import { ArchivedListStore } from "store/ArchivedListStore";
 import { v4 as uuid } from "uuid";
-import { AgentConversationMessage, GaleConversationalAgent, AgentManifest } from "totoms";
+import { AgentConversationMessage, GaleConversationalAgent, AgentManifest, newTotoServiceToken, TotoMessage, MessageDestination } from "totoms";
 import { AddItemIntent } from "./intents/AddItem";
-import { AddItemToList } from "dlg/AddItemToList";
+import { AddItemsToListProcess } from "process/AddItemsToListProcess";
+import { ListItem } from "model/ListItem";
+import moment from "moment-timezone";
 
 export class SuppieAgent extends GaleConversationalAgent {
 
@@ -98,7 +100,23 @@ export class SuppieAgent extends GaleConversationalAgent {
             })
 
             // TODO: Add the items to the shopping list in the DB
+            const items: ListItem[] = addItemIntentResult.items.map(itemName => (new ListItem(itemName)));
 
+            const addItemProcess = new AddItemsToListProcess(newTotoServiceToken(config), config, this.cid!, items, async (itemId, itemToPublish, authToken) => {
+                const timestamp = moment().tz('Europe/Rome').format('YYYY.MM.DD HH:mm:ss');
+                const message: TotoMessage = {
+                    timestamp: timestamp,
+                    cid: this.cid!,
+                    id: itemId,
+                    type: "itemAdded",
+                    msg: `Item [${itemToPublish.id}] added to the Supermarket List`,
+                    data: { item: itemToPublish, authToken: authToken }
+                };
+
+                await this.messageBus.publishMessage(new MessageDestination({ topic: "supermarket" }), message)
+            });
+
+            await addItemProcess.do(db);
         }
         else if (intent.output?.intent === "removeItems") {
             throw new Error("Not implemented yet");

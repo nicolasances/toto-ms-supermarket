@@ -29,6 +29,20 @@ export class ListStore {
     }
 
     /**
+     * Adds multiple items to the list in a single transaction.
+     * 
+     * @param items the item to add
+     */
+    async addItemsToList(items: ListItem[]): Promise<string[]> {
+
+        // Save to db
+        const result = await this.db.collection(this.config.getCollections().items).insertMany(items);
+
+        return Object.values(result.insertedIds).map(id => id.toHexString());
+
+    }
+
+    /**
      * Delets the item from the main supermarket list
      * 
      * @param itemId the id of the item to delete
