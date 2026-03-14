@@ -38,6 +38,19 @@ export class SuppieAgent extends GaleConversationalAgent {
 
         const result = await new AgenticLoop({ ai, tools, correlationId: this.cid }).loop({ goal: message.message });
 
+        this.publishMessage({
+            conversationId: message.conversationId,
+            messageId: message.messageId,
+            agentId: message.agentId,
+            message: result.finalAnswer, 
+            actor: "agent", 
+            stream: {
+                streamId: streamId,
+                sequenceNumber: streamMessageIndex++,
+                last: true
+            }
+        })
+
         return {
             conversationId: message.conversationId,
             messageId: message.messageId,
