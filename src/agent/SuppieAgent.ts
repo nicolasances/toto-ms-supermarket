@@ -1,13 +1,8 @@
 import { ControllerConfig } from "Config";
 import { vertexAI } from "@genkit-ai/google-genai";
 import { genkit, z } from "genkit";
-import { ArchivedListStore } from "store/ArchivedListStore";
 import { v4 as uuid } from "uuid";
 import { AgentConversationMessage, GaleConversationalAgent, AgentManifest, newTotoServiceToken, TotoMessage, MessageDestination } from "totoms";
-import { AddItemIntent } from "./intents/AddItem";
-import { AddItemsToListProcess } from "process/AddItemsToListProcess";
-import { ListItem } from "model/ListItem";
-import moment from "moment-timezone";
 import { AgenticLoop } from "@nicolas.ances/toten";
 import { createTools } from "./tools/SuppieTools";
 
