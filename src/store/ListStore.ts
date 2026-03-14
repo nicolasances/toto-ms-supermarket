@@ -5,12 +5,10 @@ import { ListItem } from "../model/ListItem";
 export class ListStore {
 
     db: Db;
-    cid: string;
     config: ControllerConfig;
 
-    constructor(db: Db, cid: string, config: ControllerConfig) {
+    constructor(db: Db, config: ControllerConfig) {
         this.db = db;
-        this.cid = cid;
         this.config = config;
     }
 

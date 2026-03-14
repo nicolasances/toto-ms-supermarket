@@ -9,12 +9,14 @@ const SUPERMARKETS = {
 export class SupermarketStore {
 
     getSupermarkets(): { supermarkets: Supermarket[] } {
+
         return {
             supermarkets: Object.values(SUPERMARKETS)
         }
     }
 
     async getSupermarket(id: string): Promise<Supermarket> {
+
         return SUPERMARKETS[id] as Supermarket
     }
 }

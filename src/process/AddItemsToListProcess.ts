@@ -33,7 +33,7 @@ export class AddItemsToListProcess extends Process<{ id: string } | null> {
     async do(db: Db): Promise<{ id: string } | null> {
 
         // Create the store
-        const store = new ListStore(db, this.cid, this.config);
+        const store = new ListStore(db, this.config);
 
         // Remove items that are already there
         const existingItems = await store.getItems();
