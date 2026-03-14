@@ -34,7 +34,7 @@ export class SuppieAgent extends GaleConversationalAgent {
             // model: "amazon.nova-pro",
         });
 
-        const tools = createTools(ai, config, this.cid);
+        const tools = createTools(ai, config, this.messageBus, this.cid);
 
         const result = await new AgenticLoop({ ai, tools, correlationId: this.cid }).loop({ goal: message.message });
 

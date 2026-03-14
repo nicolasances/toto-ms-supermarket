@@ -7,7 +7,7 @@ import { Process } from "../util/MongoTransaction";
 /**
  * Adds multiple items to the list in a single transaction.
  */
-export class AddItemsToListProcess extends Process<{ id: string } | null> {
+export class AddItemsToListProcess extends Process<{ ids: string[] } | null> {
 
     config: ControllerConfig;
     cid: string;
@@ -30,7 +30,7 @@ export class AddItemsToListProcess extends Process<{ id: string } | null> {
         this.publishItemAdded = publishItemAdded;
     }
 
-    async do(db: Db): Promise<{ id: string } | null> {
+    async do(db: Db): Promise<{ ids: string[] } | null> {
 
         // Create the store
         const store = new ListStore(db, this.config);
@@ -52,7 +52,7 @@ export class AddItemsToListProcess extends Process<{ id: string } | null> {
         }
 
         // Return the created Ids
-        return { id: itemIds[0] }
+        return { ids: itemIds }
 
     }
 

@@ -1,9 +1,12 @@
 import { ControllerConfig } from "Config";
 import { Genkit, ToolAction, z } from "genkit";
 import { ListItem } from "model/ListItem";
+import moment from "moment-timezone";
+import { AddItemsToListProcess } from "process/AddItemsToListProcess";
 import { ListStore } from "store/ListStore";
+import { MessageDestination, newTotoServiceToken, TotoMessage, TotoMessageBus } from "totoms";
 
-export function createTools(ai: Genkit, config: ControllerConfig, cid?: string): ToolAction[] {
+export function createTools(ai: Genkit, config: ControllerConfig, messageBus: TotoMessageBus, cid?: string): ToolAction[] {
 
     const getSupermarketListItems = ai.defineTool({
         name: "getSupermarketListItems",
@@ -33,11 +36,35 @@ export function createTools(ai: Genkit, config: ControllerConfig, cid?: string):
     }, async ({ items }) => {
 
         const db = await config.getMongoDb(config.getDBName());
-        const listStore = new ListStore(db, config);
 
-        const results = await listStore.addItemsToList(items.map(item => ({ name: item, ticked: false } as ListItem)));
+        const itemsToAdd = items.map(name => ({ name, ticked: false } as ListItem))
 
-        return { success: results.length === items.length };
+        await new AddItemsToListProcess(
+            newTotoServiceToken(config),
+            config,
+            cid ?? "",
+            itemsToAdd,
+            async (itemId: string, item: ListItem, authToken: string) => {
+
+                const timestamp = moment().tz('Europe/Rome').format('YYYY.MM.DD HH:mm:ss');
+
+                const message: TotoMessage = {
+                    timestamp: timestamp,
+                    cid: cid ?? "",
+                    id: itemId,
+                    type: "itemAdded",
+                    msg: `Item [${itemId}] added to the Supermarket List`,
+                    data: { item: item, authToken: authToken }
+                };
+
+                await messageBus.publishMessage(new MessageDestination({ topic: "supermarket" }), message)
+            }
+        ).do(db);
+
+        return {
+            success: true
+        }
+
     });
 
     return [getSupermarketListItems, addItemsToSupermarketList];
