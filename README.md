@@ -1,4 +1,4 @@
-# Toto Supermarket
+# Toto Supermarket API
 
 This service manages everything related to grocery shopping. It is the backbone of the **Toto Suppie** app, which helps users build and execute grocery shopping lists across multiple supermarkets.
 
