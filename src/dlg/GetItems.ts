@@ -24,7 +24,7 @@ export class GetItems extends TotoDelegate<GetItemsRequest, GetItemsResponse> {
             const db = await config.getMongoDb(config.getDBName());
 
             // Create the store
-            const store = new ListStore(db, this.cid!, config);
+            const store = new ListStore(db, config);
 
             // Get the items
             const items = await store.getItems();

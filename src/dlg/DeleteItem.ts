@@ -27,7 +27,7 @@ export class DeleteItem extends TotoDelegate<DeleteItemRequest, DeleteItemRespon
             const db = await config.getMongoDb(config.getDBName());
 
             // Create the store
-            const store = new ListStore(db, this.cid!, config);
+            const store = new ListStore(db, config);
 
             // Delete the item
             await store.deleteItem(itemId);

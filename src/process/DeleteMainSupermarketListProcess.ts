@@ -21,7 +21,7 @@ export class DeleteMainSupermarketListProcess extends Process<void> {
         const logger = Logger.getInstance();
 
         // Instantiate stores
-        const store = new ListStore(db, this.cid, this.config);
+        const store = new ListStore(db, this.config);
 
         logger.compute(this.cid, `Deleting all items in the Main List.`)
 

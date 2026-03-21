@@ -28,7 +28,7 @@ export class UpdateItem extends TotoDelegate<UpdateItemRequest, UpdateItemRespon
             const db = await config.getMongoDb(config.getDBName());
 
             // Create the store
-            const store = new ListStore(db, this.cid!, config);
+            const store = new ListStore(db, config);
 
             // Save the item
             await store.updateItem(itemId, req.item);

@@ -5,12 +5,10 @@ import { ListItem } from "../model/ListItem";
 export class ListStore {
 
     db: Db;
-    cid: string;
     config: ControllerConfig;
 
-    constructor(db: Db, cid: string, config: ControllerConfig) {
+    constructor(db: Db, config: ControllerConfig) {
         this.db = db;
-        this.cid = cid;
         this.config = config;
     }
 
@@ -25,6 +23,20 @@ export class ListStore {
         const result = await this.db.collection(this.config.getCollections().items).insertOne(item);
 
         return result.insertedId.toHexString();
+
+    }
+
+    /**
+     * Adds multiple items to the list in a single transaction.
+     * 
+     * @param items the item to add
+     */
+    async addItemsToList(items: ListItem[]): Promise<string[]> {
+
+        // Save to db
+        const result = await this.db.collection(this.config.getCollections().items).insertMany(items);
+
+        return Object.values(result.insertedIds).map(id => id.toHexString());
 
     }
 
