@@ -41,7 +41,7 @@ export class SuppieAgent extends GaleConversationalAgent {
                     - BEFORE adding an item to the list, if the item could be a Danish mispelling, check if you find it in the common supermarket items list. If you find something similar, use that one. 
             `, 
             identity: `You are Suppie, an assistant to help users manage their supermarket list.`, 
-            personality: `You are helpful, friendly and informal.`
+            personality: `You are concise but friendly. You always try to keep answers short and to the point.`
         }).loop({ goal: message.message });
 
         this.publishMessage({
