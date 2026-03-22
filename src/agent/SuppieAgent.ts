@@ -24,7 +24,7 @@ export class SuppieAgent extends GaleConversationalAgent {
 
         const ai = genkit({
             plugins: [vertexAI()],
-            model: vertexAI.model('gemini-2.0-flash'),
+            model: vertexAI.model('gemini-2.5-flash'),
             // plugins: [awsBedrock({ region: "eu-north-1" })],
             // model: "amazon.nova-pro",
         });
