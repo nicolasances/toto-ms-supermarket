@@ -3,6 +3,7 @@ import { Genkit, ToolAction, z } from "genkit";
 import { ListItem } from "model/ListItem";
 import moment from "moment-timezone";
 import { AddItemsToListProcess } from "process/AddItemsToListProcess";
+import { ArchivedListStore } from "store/ArchivedListStore";
 import { ListStore } from "store/ListStore";
 import { MessageDestination, newTotoServiceToken, TotoMessage, TotoMessageBus } from "totoms";
 
@@ -67,5 +68,27 @@ export function createTools(ai: Genkit, config: ControllerConfig, messageBus: To
 
     });
 
-    return [getSupermarketListItems, addItemsToSupermarketList];
+
+    const getCommonItems = ai.defineTool(
+        {
+            name: "getCommonItems",
+            description: "Returns a list of common supermarket items added in the supermarket list in the past.",
+            inputSchema: z.object({}),
+            outputSchema: z.object({
+                items: z.array(z.string()).describe("The list of common supermarket items."),
+            }),
+        },
+        async () => {
+
+            const db = await config.getMongoDb(config.getDBName());
+            const store = new ArchivedListStore(db, config);
+
+            // Get the names
+            const names = await store.getDistinctItemNames(300);
+
+            return { items: names }
+        }
+    );
+
+    return [getSupermarketListItems, addItemsToSupermarketList, getCommonItems];
 }
