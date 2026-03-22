@@ -32,6 +32,12 @@ export class AddItemToListProcess extends Process<{ id: string }> {
         // Create the store
         const store = new ListStore(db, this.config);
 
+        // Check for duplicate (case-insensitive)
+        const existingItems = await store.getItems();
+        const duplicate = existingItems.find(existing => existing.name.toLowerCase() === this.item.name.toLowerCase());
+
+        if (duplicate) return { id: duplicate.id! };
+
         // Save the item
         const itemId = await store.addItemToList(this.item);
 
