@@ -23,7 +23,7 @@ export class SuppieAgent extends GaleConversationalAgent {
         let streamMessageIndex = 1;
 
         const ai = genkit({
-            plugins: [vertexAI({ location: "europe-west1" })],
+            plugins: [vertexAI()],
             model: vertexAI.model('gemini-2.0-flash'),
             // plugins: [awsBedrock({ region: "eu-north-1" })],
             // model: "amazon.nova-pro",
