@@ -63,11 +63,6 @@ const config: TotoMicroserviceConfiguration = {
             OnLocationListClosed
         ]
     },
-    agentsConfiguration: {
-        agents: [
-            SuppieAgent
-        ]
-    }
 };
 
 TotoMicroservice.init(config).then(microservice => {
