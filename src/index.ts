@@ -63,6 +63,15 @@ const config: TotoMicroserviceConfiguration = {
             OnLocationListClosed
         ]
     },
+    mcpConfiguration: {
+        enableMCP: true,
+        serverConfiguration: {
+            name: "toto-ms-supermarket-mcp-server",
+            tools: [
+                GetNames
+            ]
+        }
+    }
 };
 
 TotoMicroservice.init(config).then(microservice => {

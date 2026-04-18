@@ -1,7 +1,8 @@
 import { Request } from "express";
-import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
+import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger, TotoMCPDelegate, TotoMCPToolDefinition } from "totoms";
 import { ControllerConfig } from "../Config";
 import { ArchivedListStore } from "../store/ArchivedListStore";
+import z from "zod";
 
 interface GetNamesRequest extends TotoRequest {
 }
@@ -18,7 +19,16 @@ interface GetNamesResponse {
  *  - Creating a dictionnary of terms for ML training
  * 
  */
-export class GetNames extends TotoDelegate<GetNamesRequest, GetNamesResponse> {
+export class GetNames extends TotoMCPDelegate<GetNamesRequest, GetNamesResponse> {
+
+    getToolDefinition(): TotoMCPToolDefinition {
+        return {
+            name: "getCommonItems", 
+            description: "Gets the names of the most commonly shopped items.",
+            inputSchema: z.object({}),
+            title: "Get common shopping items names"
+        }
+    }
 
     async do(req: GetNamesRequest, userContext?: UserContext): Promise<GetNamesResponse> {
 
