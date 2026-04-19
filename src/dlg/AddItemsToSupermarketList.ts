@@ -1,9 +1,9 @@
 import { Request } from "express";
-import { TotoMCPDelegate, TotoMCPToolDefinition, TotoRequest, UserContext, ValidationError, Logger, newTotoServiceToken } from "totoms";
+import { MessageDestination, TotoMCPDelegate, TotoMCPToolDefinition, TotoRequest, TotoMessage, UserContext, ValidationError, Logger, newTotoServiceToken } from "totoms";
 import { ControllerConfig } from "../Config";
 import { ListItem } from "../model/ListItem";
 import { AddItemsToListProcess } from "../process/AddItemsToListProcess";
-import { publishItemAdded } from "../util/SupermarketEventPublisher";
+import moment from "moment-timezone";
 import z from "zod";
 
 interface AddItemsToSupermarketListRequest extends TotoRequest {
@@ -45,7 +45,16 @@ export class AddItemsToSupermarketList extends TotoMCPDelegate<AddItemsToSuperma
                 cid,
                 itemsToAdd,
                 async (itemId: string, item: ListItem) => {
-                    await publishItemAdded(config, cid, itemId, item, authToken);
+                    const timestamp = moment().tz("Europe/Rome").format("YYYY.MM.DD HH:mm:ss");
+                    const message: TotoMessage = {
+                        timestamp,
+                        cid,
+                        id: itemId,
+                        type: "itemAdded",
+                        msg: `Item [${itemId}] added to the Supermarket List`,
+                        data: { item, authToken }
+                    };
+                    await this.messageBus.publishMessage(new MessageDestination({ topic: "supermarket" }), message);
                 }
             ).do(db);
 

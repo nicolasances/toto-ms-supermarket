@@ -36,6 +36,4 @@ export class ControllerConfig extends TotoControllerConfig {
     getDBName() { return dbName }
     getCollections() { return collections }
 
-    getSecretsManager() { return this.secretsManager }
-
 }
