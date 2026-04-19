@@ -1,8 +1,9 @@
 import { Request } from "express";
-import { TotoDelegate, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
+import { TotoMCPDelegate, TotoMCPToolDefinition, UserContext, ValidationError, TotoRequest, Logger } from "totoms";
 import { ControllerConfig } from "../Config";
 import { ListStore } from "../store/ListStore";
 import { ListItem } from "../model/ListItem";
+import z from "zod";
 
 interface GetItemsRequest extends TotoRequest {
 }
@@ -11,7 +12,16 @@ interface GetItemsResponse {
     items: ListItem[];
 }
 
-export class GetItems extends TotoDelegate<GetItemsRequest, GetItemsResponse> {
+export class GetItems extends TotoMCPDelegate<GetItemsRequest, GetItemsResponse> {
+
+    getToolDefinition(): TotoMCPToolDefinition {
+        return {
+            name: "getSupermarketListItems",
+            description: "Returns the current items in the user's main supermarket shopping list.",
+            inputSchema: z.object({}),
+            title: "Get supermarket list items"
+        };
+    }
 
     async do(req: GetItemsRequest, userContext?: UserContext): Promise<GetItemsResponse> {
 

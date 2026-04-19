@@ -19,7 +19,6 @@ import { OnItemAdded } from "./evt/handlers/OnItemAdded";
 import { OnItemDeleted } from "./evt/handlers/OnItemDeleted";
 import { OnLocationListClosed } from "./evt/handlers/OnLocationListClosed";
 import { SuppieAgent } from "agent/SuppieAgent";
-import { GetSupermarketListItems } from "./dlg/GetSupermarketListItems";
 import { AddItemsToSupermarketList } from "./dlg/AddItemsToSupermarketList";
 
 const config: TotoMicroserviceConfiguration = {
@@ -71,7 +70,7 @@ const config: TotoMicroserviceConfiguration = {
             name: "toto-ms-supermarket-mcp-server",
             tools: [
                 GetNames,
-                GetSupermarketListItems,
+                GetItems,
                 AddItemsToSupermarketList
             ]
         }
