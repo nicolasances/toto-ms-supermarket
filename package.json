@@ -1,6 +1,6 @@
 {
   "name": "toto-ms-supermarket",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Toto Supermarket API",
   "main": "index.js",
   "scripts": {
