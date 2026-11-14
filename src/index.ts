@@ -23,6 +23,7 @@ import { AddItemsToSupermarketList } from "./dlg/AddItemsToSupermarketList";
 
 const config: TotoMicroserviceConfiguration = {
     serviceName: "toto-ms-supermarket",
+    basePath: '/supermarket',
     environment: {
         hyperscaler: (process.env.HYPERSCALER as SupportedHyperscalers) || "gcp",
         hyperscalerConfiguration: getHyperscalerConfiguration()
