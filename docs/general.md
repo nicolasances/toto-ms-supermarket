@@ -15,3 +15,6 @@ A *Location (L)* is a Supermarket in a given place.
 ## 2. Specific flows
 
  1. [Adding an Item](adding-item.md)
+
+## 3. API base path
+All the public API paths of the service are prefixed with `/supermarket` (e.g. `/supermarket/list/items`). See [Functional endpoints](functional-endpoints.md).

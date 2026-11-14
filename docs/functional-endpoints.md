@@ -2,6 +2,9 @@
 
 This document explains the functional behavior of the `toto-ms-supermarket` microservice. It focuses on what each endpoint does from a business perspective (shopping list, location lists, shopping session, and training data).
 
+## Base path
+All endpoints are served under the `/supermarket` base path (required to route the service on the shared GKE Gateway). The paths documented below are relative to it: e.g. `GET /list/items` is reachable at `GET /supermarket/list/items`. This includes `POST /supermarket/events`, which is the Pub/Sub push endpoint.
+
 ## Core concepts (quick recap)
 - **Main List**: The editable, global shopping list.
 - **Location List**: A sorted list for a specific supermarket (shopping session).
