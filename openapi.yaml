@@ -6,7 +6,7 @@ info:
     OpenAPI specification for the `toto-ms-supermarket` microservice.
 
 servers:
-  - url: https://toto-ms-supermarket-{environment}-ew.a.run.app
+  - url: https://toto-ms-supermarket-{environment}-ew.a.run.app/supermarket
     description: Endpoint
     variables:
       environment:
